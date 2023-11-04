@@ -1,0 +1,14 @@
+.header-links{
+    margin-left: auto;
+}
+
+.header-links a {
+    color: white;
+    text-decoration: none;
+    margin-right: 40px;
+    font-size: 14px;
+}
+
+.header-links a:last-child {
+    margin-right: 80px;
+}

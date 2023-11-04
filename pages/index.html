@@ -4,24 +4,48 @@
         <title>CoWorkLink</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="stylesheet" href="/public/index.css">
+        <link rel="stylesheet" href="/public/header.css">
     </head>
     <body>
-        <header>
-            <div class="logo-container">
-                <i class="fas fa-cubes"></i>
-                <span>CoWorkLink</span>
+        <header id="header-placeholder"></header>
+        <nav id="navigation-placeholder"></nav>
+
+        <div class="promotion">
+            <p>Work as a team, succeed as a team.<br/> We believe in the value of teamwork.</p>
+            <img class="promotion-image" src="/public/image/main_promotion.jpg" alt="CoWorkLink Promotion Image">
+            <i class="fa-solid fa-angles-down"></i>
+        </div>
+        <div class="about">
+            <p>About</p>
+            <div class="promotion-text">
+                <p>CoWorkLink은 여러분의 아이디어와 열정을 현실로 만들기 위한 동반자입니다.<br/>
+                우리의 통합된 플랫폼은 프로젝트 생성부터 프로젝트 관리, 개인 페이지 설정까지 <br/>
+                모든 단계에서 여러분을 돕습니다. 팀원들과 함께 성장하고 성공하세요.<br/><br/>
+                지금 시작해보세요. CoWorkLink, 여러분의 끊임없는 협업 파트너입니다.</p>
             </div>
-            <div class="header-links">
-                <a href="#">Login</a>
-                <a href="#">Join</a>
-            </div>
-        </header>
-        <nav>
-            <ul>
-                <li><a href="#">Create Project</a></li>
-                <li><a href="#">My Project</a></li>
-                <li><a href="#">My Page</a></li>
-            </ul>
-        </nav>
+        </div>
+
+        <footer id="footer-placeholder"></footer>
+
+        <script>
+            // fetch the template content for header
+            fetch('/public/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-placeholder').innerHTML = data;
+            });
+
+            fetch('/public/navigation.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navigation-placeholder').innerHTML = data;
+            });
+
+            fetch('/public/footer.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('footer-placeholder').innerHTML = data;
+            });
+        </script>
     </body>
 </html>
