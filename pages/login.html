@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Login</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <link rel="stylesheet" href="/public/index.css">
+        <link rel="stylesheet" href="/public/login.css">
+        <script>
+            function redirectToRegister() {
+                var username = document.getElementById('username').value;
+                var password = document.getElementById('password').value;
+                if (username && password) {
+                    window.location.href = "/ContactList";
+                } else {
+                    alert("아이디와 비밀번호를 입력해주세요.");
+                }
+            }
+        </script>
+    </head>
+    <body>
+        <header id="header-placeholder"></header>
+        <nav id="navigation-placeholder"></nav>
+
+        <div class="login-container">
+            <form action="#" method="get">
+                <h5 class="login-text">Login</h5>
+                <div class="input-box">
+                    <p class="id-text">ID</p>
+                    <input type="text" id="username" name="username" placeholder="아이디" required>
+                </div>
+                <div class="input-box">
+                    <p class="password-text">PASSWORD</p>
+                    <input type="password" id="password" name="password" placeholder="비밀번호" required>
+                </div>
+                <div>
+                    <input type="submit" value="LOGIN" onclick="redirectToRegister()">
+                </div>
+            </form>
+        </div>
+
+        <footer id="footer-placeholder"></footer>
+        <script>
+            // fetch the template content for header
+            fetch('/public/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-placeholder').innerHTML = data;
+            });
+
+            fetch('/public/navigation.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navigation-placeholder').innerHTML = data;
+            });
+
+            fetch('/public/footer.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('footer-placeholder').innerHTML = data;
+            });
+        </script>
+    </body>
+</html>

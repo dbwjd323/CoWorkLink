@@ -17,6 +17,8 @@ app.use(bodyParser.urlencoded({
 }));
 
 app.use("/public", express.static(path.join(__dirname,"public")));
+app.use("/pages", express.static(path.join(__dirname,"pages")));
+
 
 app.listen(3001, function(){
     console.log('Server running at http://127.0.0.1:3001');
@@ -26,3 +28,8 @@ app.listen(3001, function(){
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/pages/index.html'));
   });
+
+  app.get('/pages/login.html', function(req, res) {
+    res.sendFile(path.join(__dirname, '/pages/login.html'));
+});
+

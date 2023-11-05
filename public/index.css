@@ -26,7 +26,7 @@ nav {
     background-color: #094275;
     color: white;
     text-align: left;
-    padding: 20px;
+    padding: 10px;
     width: 100%;
     height: 450px;
     bottom: 0;
@@ -42,8 +42,8 @@ nav {
 .promotion-image{
     float: right;
     margin-left: 60px;
-    width: 630px;
-    height: 468px;
+    width: 769px;
+    height: 429px;
 }
 
 .promotion i {
@@ -59,9 +59,9 @@ nav {
     background-color: #094275;
     color: white;
     text-align: center;
-    padding: 20px;
+    padding: 10px;
     width: 100%;
-    height: 450px;
+    height: 475px;
     bottom: 0;
     justify-content: center;
     align-items: center;
