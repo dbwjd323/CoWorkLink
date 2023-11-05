@@ -21,12 +21,14 @@ form{
     font-size: 40px;
     font-weight: 500;
     margin-bottom: 0px;
+    margin-top: 10px;
 }
 
 .input-box{
     width: 100%;
 }
 
+.name-text,
 .id-text, 
 .password-text,
 .email-text{
