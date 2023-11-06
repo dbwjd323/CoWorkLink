@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Login</title>
+        <title>Join</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="stylesheet" href="/public/index.css">
         <link rel="stylesheet" href="/public/join.css">
@@ -12,7 +12,7 @@
         <nav id="navigation-placeholder"></nav>
 
         <div class="join-container">
-            <form action="#" method="get">
+            <form action="/join" method="post">
                 <h5 class="join-text">Join</h5>
                 <div class="input-box">
                     <p class="name-text">NAME</p>
@@ -25,7 +25,7 @@
                 <div class="input-box">
                     <p class="password-text">PASSWORD</p>
                     <input type="password" id="password" name="password" placeholder="비밀번호" required>
-                    <input type="password" id="password" name="password" placeholder="비밀번호 확인" required>
+                    <input type="password" id="passwordConfirm" name="passwordConfirm" placeholder="비밀번호 확인" required>
                 </div>
                 <div class="input-box">
                     <p class="email-text">EMAIL</p>
@@ -36,8 +36,7 @@
                     <label for="agreement-checkbox">이용약관 및 개인정보 처리방침에 동의합니다</label>
                 </div>
                 <div class="join-button">
-                    <input type="submit" value="가입하기" onclick="checkAgreement()">
-                </div>
+                    <input type="submit" value="가입하기" onclick="return checkAgreement(event)">                </div>
             </form>
         </div>
 
@@ -62,15 +61,29 @@
                 document.getElementById('footer-placeholder').innerHTML = data;
             });
 
-            function checkAgreement() {
+            function checkAgreement(event) {
                 var checkBox = document.getElementById("agreement-checkbox");
                 if (checkBox.checked == true) {
-                    // 체크되었을 때 할 작업
+                    return true;
                 } else {
                     alert("약관에 동의해주세요");
+                    event.preventDefault(); // Prevent the form from being submitted
+                    return false;
                 }
             }
-            
+        </script>
+        <script>
+            var urlParams = new URLSearchParams(window.location.search);
+            var error = urlParams.get('error');
+            if (error) {
+                alert(error);
+                var username = urlParams.get('username') || '';
+                var userID = urlParams.get('userID') || '';
+                var email = urlParams.get('email') || '';
+                document.getElementById('username').value = username;
+                document.getElementById('userID').value = userID;
+                document.getElementById('email').value = email;
+            }
         </script>
     </body>
 </html>
