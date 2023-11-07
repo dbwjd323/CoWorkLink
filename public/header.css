@@ -1,4 +1,5 @@
 .header-links{
+    display: flex;
     margin-left: auto;
 }
 

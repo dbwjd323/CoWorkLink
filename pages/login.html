@@ -6,24 +6,13 @@
         <link rel="stylesheet" href="/public/index.css">
         <link rel="stylesheet" href="/public/login.css">
         <script src="/public/script.js"></script>
-        <script>
-            function redirectToRegister() {
-                var username = document.getElementById('username').value;
-                var password = document.getElementById('password').value;
-                if (username && password) {
-                    window.location.href = "/ContactList";
-                } else {
-                    alert("아이디와 비밀번호를 입력해주세요.");
-                }
-            }
-        </script>
     </head>
     <body>
         <header id="header-placeholder"></header>
         <nav id="navigation-placeholder"></nav>
 
         <div class="login-container">
-            <form action="#" method="get">
+            <form action="/login" method="post">
                 <h5 class="login-text">Login</h5>
                 <div class="input-box">
                     <p class="id-text">ID</p>
@@ -62,6 +51,18 @@
             .then(data => {
                 document.getElementById('footer-placeholder').innerHTML = data;
             });
+
+            function redirectToRegister() {
+                var userID = document.getElementById('userID').value;
+                var password = document.getElementById('password').value;
+                if (userID && password) {
+                    isLoggedIn = true;
+                    window.location.href = "/pages/index.html";
+                } else {
+                    alert("아이디와 비밀번호를 입력해주세요.");
+                }
+            }
+
         </script>
     </body>
 </html>

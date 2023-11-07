@@ -2,6 +2,7 @@ var fs = require('fs');
 var ejs = require('ejs');
 var mysql = require('mysql');
 var express = require('express');
+var session = require('express-session');
 var bodyParser = require('body-parser');
 const path = require('path');
 
@@ -11,9 +12,24 @@ var client = mysql.createConnection({
     database: 'CoWorkLink'
 });
 
+client.connect((err) => {
+    if (err) {
+      console.error('Error connecting: ' + err.stack);
+      return;
+    }
+    console.log('Connected as id ' + client.threadId);
+  });
+
 var app = express();
 app.use(bodyParser.urlencoded({
     extended: false
+}));
+
+// express-session 미들웨어 설정
+app.use(session({
+    secret: 'secret-key',
+    resave: false,
+    saveUninitialized: true
 }));
 
 app.use("/public", express.static(path.join(__dirname,"public")));
@@ -29,15 +45,9 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '/pages/index.html'));
   });
 
-  app.get('/login', function(req, res) {
-    res.sendFile(path.join(__dirname, '/pages/login.html'));
-});
-
 app.get('/join', function(req, res) {
     res.sendFile(path.join(__dirname, '/pages/join.html'));
 });
-
-// ...
 
 app.post('/join', function(req, res) {
     var username = req.body.username;
@@ -66,4 +76,43 @@ app.post('/join', function(req, res) {
             res.end();
         }
     });
+});
+
+app.get('/login', function(req, res) {
+    // 로그인 페이지에 접속할 때 세션을 확인하여 로그인 상태를 파악합니다.
+    if (req.session.isLoggedIn) {
+        res.redirect('/pages/index.html'); // 이미 로그인되어 있다면 인덱스 페이지로 이동합니다.
+    } else {
+        res.sendFile(path.join(__dirname, '/pages/login.html')); // 그렇지 않으면 로그인 페이지를 렌더링합니다.
+    }
+});
+
+app.post('/login', (req, res) => {
+    const userID = req.body.userID;
+    const password = req.body.password;
+  
+    const sql = 'SELECT * FROM users WHERE userID = ? AND password = ?';
+    client.query(sql, [userID, password], (error, results, fields) => {
+        if (error) {
+            res.send('에러가 발생했습니다.');
+        } else {
+            if (results.length > 0) {
+                req.session.isLoggedIn = true;
+                res.redirect('/pages/index.html');
+            } else {
+                res.send('아이디 또는 비밀번호가 맞지 않습니다');
+            }
+        }
+    });
+});
+
+// 클라이언트로부터 로그아웃 요청을 받아 로그아웃 처리를 합니다.
+app.get('/logout', (req, res) => {
+    req.session.isLoggedIn = false; // 로그아웃 시 세션에서 로그인 상태를 false로 변경합니다.
+    res.redirect('/'); // 로그아웃 후 홈페이지로 리다이렉트합니다.
+});
+
+// 클라이언트로 로그인 상태를 JSON 형식으로 응답합니다.
+app.get('/getLoginStatus', (req, res) => {
+    res.json({ isLoggedIn: req.session.isLoggedIn });
 });

@@ -10,9 +10,21 @@
             <span>CoWorkLink</span>
         </div>
             <ul>
-                <li><a href="#">Create Project</a></li>
+                <li><a id=create-project-button href="/pages/create.html">Create Project</a></li>
                 <li><a href="#">My Project</a></li>
                 <li><a href="#">My Page</a></li>
             </ul>
+
+            <script>
+                const isLoggedIn = true; // 현재 로그인 상태 여부
+            
+                // 기본 페이지로 이동 또는 로그인 상태에 따라 처리
+                function redirectToHome() {
+                    if (isLoggedIn) {
+                        window.location.href = "/pages/index.html";
+                    }
+                    // 여기에 다른 처리 추가
+                }
+            </script>
     </body>
 </html>
