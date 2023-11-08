@@ -11,13 +11,27 @@
         </div>
             <ul>
                 <li><a id=create-project-button href="/pages/create.html">Create Project</a></li>
-                <li><a href="#">My Project</a></li>
+                <li><a id=myproject-button href="/pages/myProject.html">My Project</a></li>
                 <li><a href="#">My Page</a></li>
             </ul>
 
             <script>
                 const isLoggedIn = true; // 현재 로그인 상태 여부
             
+                // 페이지 로딩 시에 실행되는 함수
+                document.addEventListener('DOMContentLoaded', function() {
+                    const createProjectButton = document.getElementById('create-project-button');
+                    
+                    if (isLoggedIn) {
+                        createProjectButton.setAttribute('href', '/pages/create.html');
+                    } else {
+                        createProjectButton.addEventListener('click', function(event) {
+                            event.preventDefault();
+                            window.location.href = '/pages/login.html';
+                        });
+                    }
+                });
+
                 // 기본 페이지로 이동 또는 로그인 상태에 따라 처리
                 function redirectToHome() {
                     if (isLoggedIn) {
