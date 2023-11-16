@@ -1,17 +1,50 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Create Project</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="stylesheet" href="/public/index.css">
-        <link rel="stylesheet" href="/public/login.css">
-        <script src="/public/script.js"></script>
+        <link rel="stylesheet" href="/public/create.css">
     </head>
     <body>
         <header id="header-placeholder"></header>
         <nav id="navigation-placeholder"></nav>
         
+        <div class="create-container">
+            <h2>Create Project</h2>
+            <form action="/create" method="post">
+                <div class="form-container">
+                    <div class="name-and-info-container">
+                        <div class="name-group">
+                            <label for="projectName">Project Name</label>
+                            <input type="text" id="projectName" name="projectName">
+                        </div>
+                        <div class="project-info-group">
+                            <label for="projectInfo">Project Info</label>
+                            <textarea id="projectInfo" name="projectInfo" rows="3"></textarea>
+                        </div>
+                    </div>
+                    <div class="deadline-container">
+                        <div class="deadline-group">
+                            <label for="deadline">Deadline</label>
+                            <input type="date" id="deadline" name="deadline">
+                        </div>
+                    </div>
+                    <div class="team-group">
+                        <label for="invitedUserID">Invite Team Member (ID)</label>
+                        <div id="invitedUsers">
+                            <div class="invited-users-row">
+                                <input type="text" name="invitedUserID[]" class="invitedUserID">
+                            </div>                        
+                        </div>
+                        <button type="button" onclick="addInvitedUserInput()">+</button>
+                    </div>
 
+                    <button class="submit-btn">Create Project</button>
+                </div>
+            </form>
+        </div>
 
         <footer id="footer-placeholder"></footer>
         <script>
@@ -20,7 +53,15 @@
             .then(response => response.text())
             .then(data => {
                 document.getElementById('header-placeholder').innerHTML = data;
-            });
+                return fetch('/getLoginStatus');
+            })
+            .then(response => response.json())
+            .then(data => {
+                const isLoggedIn = data.isLoggedIn;
+                updateUI(isLoggedIn);
+            })
+            .catch(error => console.error('로그인 상태를 가져오는 중 오류가 발생했습니다:', error));
+
 
             fetch('/public/navigation.html')
             .then(response => response.text())
@@ -33,6 +74,29 @@
             .then(data => {
                 document.getElementById('footer-placeholder').innerHTML = data;
             });
+
+            function addInvitedUserInput() {
+            const invitedUsersContainer = document.getElementById('invitedUsers');
+            const currentInputs = document.querySelectorAll('.invitedUserID').length;
+
+            // Create a new row for every four inputs
+            if (currentInputs % 4 === 0) {
+                const newRow = document.createElement('div');
+                newRow.classList.add('invited-users-row');
+                invitedUsersContainer.appendChild(newRow);
+            }
+            // Find the last row (could be the newly created one)
+            const rows = document.querySelectorAll('.invited-users-row');
+            const lastRow = rows[rows.length - 1];
+
+            // Add a new input to the last row
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.name = 'invitedUserID[]';
+            newInput.classList.add('invitedUserID');
+            lastRow.appendChild(newInput);
+            }
+            
         </script>
     </body>
 </html>

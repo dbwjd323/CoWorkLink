@@ -2,43 +2,22 @@
 <html>
     <head>
         <link rel="stylesheet" href="/public/navigation.css">
-        <script src="/public/script.js"></script>
+        <script src="/public/navigation.js"></script> 
+        <!-- <script>
+            function redirectToHome() {
+                window.location.href = "/";
+            }
+        </script> -->
     </head>
     <body>
-        <div class="logo-container" onclick="redirectToHome()">
+        <div class="logo-container" onclick="window.location.href = '/'">
             <i class="fas fa-cubes"></i>
             <span>CoWorkLink</span>
         </div>
-            <ul>
-                <li><a id=create-project-button href="/pages/create.html">Create Project</a></li>
-                <li><a id=myproject-button href="/pages/myProject.html">My Project</a></li>
-                <li><a href="#">My Page</a></li>
-            </ul>
-
-            <script>
-                const isLoggedIn = true; // 현재 로그인 상태 여부
-            
-                // 페이지 로딩 시에 실행되는 함수
-                document.addEventListener('DOMContentLoaded', function() {
-                    const createProjectButton = document.getElementById('create-project-button');
-                    
-                    if (isLoggedIn) {
-                        createProjectButton.setAttribute('href', '/pages/create.html');
-                    } else {
-                        createProjectButton.addEventListener('click', function(event) {
-                            event.preventDefault();
-                            window.location.href = '/pages/login.html';
-                        });
-                    }
-                });
-
-                // 기본 페이지로 이동 또는 로그인 상태에 따라 처리
-                function redirectToHome() {
-                    if (isLoggedIn) {
-                        window.location.href = "/pages/index.html";
-                    }
-                    // 여기에 다른 처리 추가
-                }
-            </script>
+        <ul id="header-links"> <!-- navigation.html에서도 동일한 ID 사용 -->
+            <li id="create-project-item"><a id="create-project-button" href="/create">Create Project</a></li>
+            <li><a id="myproject-button" href="/pages/myProject.html">My Project</a></li>
+            <li><a href="#">My Page</a></li>
+        </ul>
     </body>
 </html>

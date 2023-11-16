@@ -4,7 +4,6 @@
         <title>CoWorkLink</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="stylesheet" href="/public/index.css">
-        <script src="/public/script.js"></script>
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
     </head>
     <body>
@@ -29,63 +28,64 @@
         <footer id="footer-placeholder"></footer>
 
         <script>
-    Promise.all([
-        fetch('/public/header.html').then(response => response.text()),
-        fetch('/public/navigation.html').then(response => response.text()),
-        fetch('/public/footer.html').then(response => response.text())
-    ]).then(([headerData, navigationData, footerData]) => {
-        document.getElementById('header-placeholder').innerHTML = headerData;
-        document.getElementById('navigation-placeholder').innerHTML = navigationData;
-        document.getElementById('footer-placeholder').innerHTML = footerData;
-    });
+            const promises = Promise.all([
+            fetch('/public/header.html').then(response => response.text()),
+            fetch('/public/navigation.html').then(response => response.text()),
+            fetch('/public/footer.html').then(response => response.text())
+            ]);
 
-    // 클라이언트 측에서 서버로 로그인 상태를 요청하여 UI를 업데이트합니다.
-    fetch('/getLoginStatus')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('HTTP error, status = ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            const isLoggedIn = data.isLoggedIn;
-            const headerLinks = document.getElementById('header-links');
-            const loginLink = document.getElementById('login-link');
-            const joinLink = document.getElementById('join-link');
-            const logoutLink = document.getElementById('logoutLink');
+            promises.then(([headerData, navigationData, footerData]) => {
+            document.getElementById('header-placeholder').innerHTML = headerData;
+            document.getElementById('navigation-placeholder').innerHTML = navigationData;
+            document.getElementById('footer-placeholder').innerHTML = footerData;
 
-            if (headerLinks) {
-                if (isLoggedIn) {
+            fetch('/getLoginStatus')
+                .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP error, status = ' + response.status);
+                }
+                return response.json();
+                })
+                .then(data => {
+                const isLoggedIn = data.isLoggedIn;
+                const headerLinks = document.getElementById('header-links');
+                const loginLink = document.getElementById('login-link');
+                const joinLink = document.getElementById('join-link');
+                const logoutLink = document.getElementById('logoutLink');
+
+                if (headerLinks) {
+                    if (isLoggedIn) {
                     if (logoutLink && logoutLink.style) {
-                        logoutLink.style.display = 'block'; // 로그인 상태에 따라 로그아웃 링크를 표시합니다.
+                        logoutLink.style.display = 'block';
 
                         logoutLink.addEventListener('click', function (e) {
-                            e.preventDefault();
-                            fetch('/logout') // 서버에 로그아웃 요청을 보냅니다.
-                                .then(() => {
-                                    window.location.href = "/"; // 로그아웃 후 홈페이지로 이동합니다.
-                                })
-                                .catch(error => console.error('로그아웃 중 오류가 발생했습니다:', error));
+                        e.preventDefault();
+                        fetch('/logout')
+                            .then(() => {
+                            window.location.href = "/";
+                            })
+                            .catch(error => console.error('로그아웃 중 오류가 발생했습니다:', error));
                         });
                     }
-                    // 로그인 상태일 때 login과 join 링크를 숨깁니다.
+
                     if (loginLink && headerLinks.contains(loginLink)) {
                         headerLinks.removeChild(loginLink);
                     }
                     if (joinLink && headerLinks.contains(joinLink)) {
                         headerLinks.removeChild(joinLink);
                     }
-                } else {
+                    } else {
                     if (logoutLink && logoutLink.style) {
-                        logoutLink.style.display = 'none'; // 비로그인 상태에 따라 로그아웃 링크를 숨깁니다.
+                        logoutLink.style.display = 'none';
                     }
+                    }
+                } else {
+                    console.error('header-links 요소를 찾을 수 없습니다.');
                 }
-            } else {
-                console.error('header-links 요소를 찾을 수 없습니다.');
-            }
-        })
-        .catch(error => console.error('로그인 상태를 가져오는 중 오류가 발생했습니다:', error));
-</script>
+                })
+                .catch(error => console.error('로그인 상태를 가져오는 중 오류가 발생했습니다:', error));
+            });
+        </script>
 
     </body>
 </html>
