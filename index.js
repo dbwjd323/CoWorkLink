@@ -9,19 +9,12 @@ const path = require('path');
 var client = mysql.createConnection({
     user: 'root',
     password: '1234',
-    database: 'CoWorkLink'
+    database: 'CoWorkLink',
+    multipleStatements: true
 });
 
-// client.connect((err) => {
-//     if (err) {
-//       console.error('Error connecting: ' + err.stack);
-//       return;
-//     }
-//     console.log('Connected as id ' + client.threadId);
-// });
-
 var app = express();
-app.use(bodyParser.urlencoded({
+app.use(express.urlencoded({
     extended: false
 }));
 
@@ -123,19 +116,38 @@ app.get('/create', function(req, res){
     }
 });
 
-app.post('/create', function(req, res) {
-    const projectName = req.body.projectName;
-    const projectInfo = req.body.projectInfo;
-    const deadline = req.body.deadline;
+app.post('/create', (req, res) => {
+    // console.log(req.body);
+    const { projectName, projectInfo, deadline, invitedUserID } = req.body;
+    const projectQuery = 'INSERT INTO projects (projectName, projectInfo, deadline) VALUES (?, ?, ?)';
 
-    const sql = 'INSERT INTO projects (projectName, projectInfo, deadline) VALUES (?, ?, ?)';
-    
-    client.query(sql, [projectName, projectInfo, deadline], function(error, results, fields) {
-        if (error) {
-            console.log(error);
-            res.status(500).send('Error saving project information');
+    client.query(projectQuery, [projectName, projectInfo, deadline], (projectErr, projectResult) => {
+        if (projectErr) {
+            console.error('프로젝트 데이터 삽입 오류:', projectErr);
+            res.status(500).send('내부 서버 오류');
         } else {
-            res.redirect('/pages/myProject.html'); // 프로젝트 정보 저장 후 홈페이지로 리다이렉트
+            const projectId = projectResult.insertId;
+
+            // invitedUserID가 배열인지 확인 후 forEach 사용
+            if (Array.isArray(invitedUserID)) {
+                // 초대된 사용자 ID를 Invitations 테이블에 삽입
+                const invitationsQuery = 'INSERT INTO invitations (projectID, userID) VALUES (?, ?)';
+                invitedUserID.forEach((userID) => {
+                    client.query(invitationsQuery, [projectId, userID], (invitationErr) => {
+                        if (invitationErr) {
+                            console.error('초대 데이터 삽입 오류:', invitationErr);
+                        }
+                    });
+                });
+                var alertMessage = "프로젝트가 성공적으로 생성되었습니다.";
+                res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                res.write('<script>alert("' + alertMessage + '");</script>');
+                res.write('<script>window.location.href="/pages/myProject.html";</script>');
+                res.end();
+                // res.status(200).json({ message: '프로젝트가 성공적으로 생성되었습니다' });
+            } else {
+                res.status(400).json({ error: '초대된 사용자 ID가 올바르게 제공되지 않았습니다.' });
+            }
         }
     });
 });
