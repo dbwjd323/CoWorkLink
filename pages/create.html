@@ -105,6 +105,11 @@
             const deadline = document.getElementById('deadline').value;
             const invitedUserInputs = document.querySelectorAll('.invitedUserID');
 
+            if (!projectName.trim() || !projectInfo.trim() || !deadline.trim()) {
+                alert('프로젝트 이름, 프로젝트 정보, 마감일을 입력하세요.');
+                return;
+            }
+
             // Check if at least one invited user ID is provided
             if (invitedUserInputs.length === 0 || invitedUserInputs[0].value.trim() === '') {
                 alert('초대된 사용자 ID를 입력하세요.');
@@ -129,13 +134,20 @@
                 },
                 body: JSON.stringify(formData),
             })
-            .then(response => response.json())
+            .then(response => {
+                // 서버 응답이 정상이면 JSON 형태로 변환하여 반환
+                if (response.ok) {
+                    return response.json();
+                }
+                // 서버 오류인 경우, 오류 응답을 JSON으로 파싱하여 예외 발생
+                throw new Error('서버 응답이 실패했습니다.');
+            })
             .then(data => {
                 if (data.error) {
                     if (data.nonExistingUserIDs && data.nonExistingUserIDs.length > 0) {
                         const nonExistingUserIDs = data.nonExistingUserIDs.join(', ');
                         alert('존재하지 않는 사용자 ID가 포함되어 있습니다. 다시 확인하세요: ' + nonExistingUserIDs);
-                        window.location.reload();
+                        window.location.href = '/create';
                     } else {
                         alert(data.error);
                     }
@@ -146,7 +158,6 @@
             })
             .catch(error => {
                 console.error('Error submitting form:', error);
-                alert('서버에 오류가 발생했습니다.');
             });
         }
     </script>

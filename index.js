@@ -84,6 +84,7 @@ app.post('/login', (req, res) => {
             res.send('에러가 발생했습니다.');
         } else {
             if (results.length > 0) {
+                req.session.userID = userID;
                 req.session.isLoggedIn = true;
                 res.redirect('/');
             } else {
@@ -137,11 +138,12 @@ app.post('/create', (req, res) => {
 
             if (nonExistingUserIDs.length > 0) {
                 // 존재하지 않는 사용자 ID가 있을 경우 에러 응답
-                res.status(400).json({ error: '존재하지 않는 사용자 ID가 포함되어 있습니다.', nonExistingUserIDs });
+                // res.status(400).json({ error: '존재하지 않는 사용자 ID가 포함되어 있습니다.', nonExistingUserIDs });
+                res.redirect('/create');
             } else {
                 // 초대할 사용자 ID가 모두 존재하면 프로젝트 및 초대 데이터 삽입 처리
-                const projectQuery = 'INSERT INTO projects (projectName, projectInfo, deadline) VALUES (?, ?, ?)';
-                client.query(projectQuery, [projectName, projectInfo, deadline], (projectErr, projectResult) => {
+                const projectQuery = 'INSERT INTO projects (projectName, projectInfo, deadline, userID) VALUES (?, ?, ?, ?)';
+                client.query(projectQuery, [projectName, projectInfo, deadline, req.session.userID], (projectErr, projectResult) => {
                     if (projectErr) {
                         console.error('프로젝트 데이터 삽입 오류:', projectErr);
                         res.status(500).send('내부 서버 오류');
@@ -166,6 +168,34 @@ app.post('/create', (req, res) => {
                     }
                 });
             }
+        }
+    });
+});
+
+app.get('/myProject', function(req, res){
+    if (!req.session.isLoggedIn) {
+        res.redirect('/login');
+        return;
+    } else {
+        res.sendFile(path.join(__dirname, '/pages/myProject.html'))
+    }
+});
+
+// 프로젝트 목록을 가져오는 엔드포인트
+app.get('/getProjects', (req, res) => {
+    // 세션에서 사용자 아이디를 가져옴 (세션에서 사용자 아이디를 저장하는 방법에 따라 다를 수 있음)
+    const userID = req.session.userID;
+
+    // 사용자 아이디를 기반으로 해당 사용자의 프로젝트 목록을 데이터베이스에서 가져오는 쿼리를 실행
+    const getProjectsQuery = 'SELECT projectName, deadline FROM projects WHERE userID = ?';
+
+    client.query(getProjectsQuery, [userID], (error, results) => {
+        if (error) {
+            console.error('프로젝트 목록을 가져오는 중 오류 발생:', error);
+            res.status(500).json({ error: '내부 서버 오류' });
+        } else {
+            // 성공적으로 가져온 경우, JSON 형태로 클라이언트에 응답
+            res.json(results);
         }
     });
 });

@@ -1,44 +1,40 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>My Project</title>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
         <link rel="stylesheet" href="/public/index.css">
         <link rel="stylesheet" href="/public/myProject.css">
+        <script src="/public/header.js"></script>
     </head>
     <body>
         <header id="header-placeholder"></header>
         <nav id="navigation-placeholder"></nav>
-        
-        <div class="project-list">
-            <div class="title-and-button">
-                <h2>My Project List</h2>
-                <button id="create-project-btn">Create Project</button>
-            </div>
-                <div class="project-box">
-                    <p class="project-name">Project Name</p>
-                    <span>마감일 : 2023.12.04</span>
-                    <span>진척도</span>
+        <form action="/myProject" method="get">
+            <div class="project-list">
+                <div class="title-and-button">
+                    <h2>My Project List</h2>
                 </div>
-                <div class="project-box">
-                    <p class="project-name">Project Name</p>
-                    <span>마감일 : 2023.12.04</span>
-                    <span>진척도</span>
+                <div class="project-box-container">
+                    <div class="project-box">
+                        <p class="project-name">Project Name</p>
+                        <span>마감일 : 2023.12.04</span>
+                        <span>진척도</span>
+                    </div>
+                    <!-- <div class="project-box">
+                        <p class="project-name">Project Name</p>
+                        <span>마감일 : 2023.12.04</span>
+                        <span>진척도</span>
+                    </div>
+                    <div class="project-box">
+                        <p class="project-name">Project Name</p>
+                        <span>마감일 : 2023.12.04</span>
+                        <span>진척도</span>
+                    </div> -->
                 </div>
-                <!-- <div class="project-box">
-                    <p class="project-name">Project Name</p>
-                    <span>마감일 : 2023.12.04</span>
-                    <span>진척도</span>
-                </div> -->
-        </div>
-
-        <!-- 모달 또는 팝업 창 -->
-        <div id="create-project-modal" class="modal">
-            <div class="modal-content">
-                <!-- 여기에 create project 창을 만드세요 -->
-                <span class="close">&times;</span>
             </div>
-        </div>
+        </form>
 
         <footer id="footer-placeholder"></footer>
         <script>
@@ -60,26 +56,46 @@
             .then(data => {
                 document.getElementById('footer-placeholder').innerHTML = data;
             });
+
+            // 서버에서 프로젝트 목록을 가져와 표시하는 함수
+            function displayProjects() {
+                fetch('/getProjects')
+                    .then(response => response.json())
+                    .then(data => {
+                        // 프로젝트 목록을 가져왔을 때 실행할 동작
+                        const projectListContainer = document.querySelector('.project-box-container');
+
+                        // 기존의 프로젝트 상자들을 모두 제거
+                        projectListContainer.innerHTML = '';
+
+                        // 가져온 프로젝트 데이터를 사용하여 동적으로 프로젝트 상자 생성
+                        data.forEach(project => {
+                            const projectBox = document.createElement('div');
+                            projectBox.classList.add('project-box');
+
+                            const projectNameElement = document.createElement('p');
+                            projectNameElement.classList.add('project-name');
+                            projectNameElement.textContent = project.projectName;
+
+                            const deadlineElement = document.createElement('span');
+                            const deadlineDate = new Date(project.deadline);
+                            deadlineElement.textContent = '마감일: ' + deadlineDate.toLocaleDateString();
+
+                            // 여기에 더 많은 프로젝트 정보를 추가할 수 있습니다.
+
+                            // 프로젝트 상자에 요소를 추가
+                            projectBox.appendChild(projectNameElement);
+                            projectBox.appendChild(deadlineElement);
+
+                            // 프로젝트 목록 컨테이너에 프로젝트 상자를 추가
+                            projectListContainer.appendChild(projectBox);
+                        });
+                    })
+                    .catch(error => console.error('프로젝트 목록을 가져오는 중 오류 발생:', error));
+            }
+
+            // 페이지 로드 시 프로젝트 목록을 표시
+            window.onload = displayProjects;
         </script>
-        <script>
-            var modal = document.getElementById("create-project-modal");
-            var btn = document.getElementById("create-project-btn");
-            var span = document.getElementsByClassName("close")[0];
-        
-            btn.onclick = function () {
-                modal.style.display = "block";
-            }
-        
-            span.onclick = function () {
-                modal.style.display = "none";
-            }
-        
-            window.onclick = function (event) {
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-            }
-        </script>
-        
     </body>
 </html>
