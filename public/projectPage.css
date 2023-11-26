@@ -1,0 +1,237 @@
+.project-page-container{
+    display: flex;
+    background-color: #094275;
+    color: white;
+    padding: 10px;
+    width: 100%;
+    flex-wrap: wrap;
+    height: 700px;
+    bottom: 0;
+}
+
+.project-title{
+    display: flex;
+    width: 100%;
+    height: 100px;
+}
+
+#projectName{
+    margin-left: 40px;
+    margin-bottom: 0;
+}
+
+.chat-button{
+    margin-right: 60px;
+    margin-left: auto;
+    margin-top: 21px;
+    width: 80px;
+    height: 50px;
+    border: none;
+    border-radius: 10px;
+    background-color: #FED7D0;
+    font-weight: bold;
+}
+
+.list-container{
+    display: flex;
+    width: 100%;
+    height: 600px;
+    flex-direction: row;
+}
+
+.project-info-box{
+    display: flex;
+    flex-direction: column; 
+    width: 400px;
+    height: 550px;
+    color: black;
+    background-color: rgb(179, 207, 242);;
+    margin-left: 40px;
+    margin-right: 30px;
+    justify-content: column;
+}
+
+.project-info{
+    display: flex;
+    flex-direction: column; 
+    width: 400px;
+    height: 150px;
+}
+
+.project-info h2{
+    margin-left: 10px;
+}
+
+#projectInfoText {
+    display: flex;
+    text-align: left;
+    height: 80px;
+    width: 380px;
+    margin-left: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.deadline-box{
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    height: 100px;
+}
+
+.deadline-box h2{
+    margin-left: 10px;
+}
+
+#deadline{
+    display: flex;
+    text-align: left;
+    height: 30px;
+    width: 380px;
+    margin-left: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.teammate-box{
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    height: 250px;
+    color: black;
+}
+
+.teammate-box h2{
+    margin-left: 10px;
+}
+
+#teammate{
+    display: flex;
+    text-align: left;
+    height: 250px;
+    width: 380px;
+    margin-left: 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.project-info-edit{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: 15px;
+    margin-bottom: 15px;
+    height: 40px;
+    width: 50px;
+    border-radius: 5px;
+    border: none;
+    background-color: rgb(112, 164, 237);
+    color: white;
+    text-decoration: none;
+}
+/* 수정팝업 */
+.edit-pop-wrap{
+    position:fixed;
+    top:0px; 
+    left:0px; 
+    right:0px; 
+    bottom:0px; 
+    background:rgba(0,0,0,.5); 
+    text-align:center;
+}
+
+.edit-pop-wrap:after{
+    display:inline-block; 
+    height:100%; 
+    vertical-align:middle; 
+    content:'';
+}
+
+.edit_pop_inner{
+    display:inline-block; 
+    margin-top: 15px;
+    margin-bottom: 15px;
+    padding:20px 30px; 
+    background:#fff; 
+    width:585px; 
+    /* height: 500px; */
+    vertical-align:middle; 
+    font-size:15px;
+}
+
+.task-list-box{
+    display: flex;
+    flex-direction: column;
+    width: 400px;
+    height: 550px;
+    background-color: rgb(179, 207, 242);
+    margin-right: 30px;
+}
+
+.list-box-title{
+    display: flex;
+    width: 400px;
+    height: 70px;
+}
+
+.list-box-title h2{
+    color: black;
+    margin-left: 10px;
+}
+
+.add-task-button{
+    margin-top: 18px;
+    margin-right: 25px;
+    margin-left: auto;
+    border-radius: 20px;
+    border: none;
+    background-color: rgb(112, 164, 237);
+    width: 40px;
+    height: 40px;
+}
+
+.list-box{
+    display: flex;
+    flex-direction: column;
+    width: 350px;
+    height: 100px;
+    background-color: white;
+    color: black;
+    margin-left: 25px;
+}
+
+.taskname-condition{
+    display: flex;
+    width: 350px;
+    height: 50px;
+}
+
+.list-box h4{
+    margin-left: 10px;
+}
+
+.condition{
+    margin-left: auto;
+    margin-right: 15px;
+    margin-top: 20px;
+}
+
+.assign-div{
+    display: flex;
+    width: 350px;
+    height: 80px;
+}
+
+.assignedTo{
+    margin-left: 10px;
+    margin-top: 10px;
+}
+
+.doc-list-box{
+    display: flex;
+    width: 320px;
+    height: 550px;
+    background-color: white;
+}
+

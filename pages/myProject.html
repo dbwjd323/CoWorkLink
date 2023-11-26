@@ -17,21 +17,10 @@
                     <h2>My Project List</h2>
                 </div>
                 <div class="project-box-container">
-                    <div class="project-box">
-                        <p class="project-name">Project Name</p>
-                        <span>마감일 : 2023.12.04</span>
-                        <span>진척도</span>
+                    <div class="project-box" onclick="window.location.href='/projectPage?projectID=${project.projectID}'">                       
+                        <p class="project-name">{{project.projectName}}</p>
+                        <span>마감일: {{new Date(project.deadline)}}</span>
                     </div>
-                    <!-- <div class="project-box">
-                        <p class="project-name">Project Name</p>
-                        <span>마감일 : 2023.12.04</span>
-                        <span>진척도</span>
-                    </div>
-                    <div class="project-box">
-                        <p class="project-name">Project Name</p>
-                        <span>마감일 : 2023.12.04</span>
-                        <span>진척도</span>
-                    </div> -->
                 </div>
             </div>
         </form>
@@ -72,6 +61,7 @@
                         data.forEach(project => {
                             const projectBox = document.createElement('div');
                             projectBox.classList.add('project-box');
+                            projectBox.setAttribute('data-project-id', project.projectID);
 
                             const projectNameElement = document.createElement('p');
                             projectNameElement.classList.add('project-name');
@@ -80,8 +70,6 @@
                             const deadlineElement = document.createElement('span');
                             const deadlineDate = new Date(project.deadline);
                             deadlineElement.textContent = '마감일: ' + deadlineDate.toLocaleDateString();
-
-                            // 여기에 더 많은 프로젝트 정보를 추가할 수 있습니다.
 
                             // 프로젝트 상자에 요소를 추가
                             projectBox.appendChild(projectNameElement);
@@ -93,9 +81,20 @@
                     })
                     .catch(error => console.error('프로젝트 목록을 가져오는 중 오류 발생:', error));
             }
-
             // 페이지 로드 시 프로젝트 목록을 표시
-            window.onload = displayProjects;
+            document.addEventListener('DOMContentLoaded', displayProjects);
+
+            // 프로젝트 상자에 대한 클릭 이벤트 처리
+            document.addEventListener('click', (event) => {
+                // 클릭된 요소가 프로젝트 상자인지 확인
+                if (event.target.classList.contains('project-box')) {
+                    // 클릭한 요소에서 프로젝트 ID를 가져옵니다.
+                    const projectID = event.target.dataset.projectId;
+                    // URL을 프로젝트 페이지로 변경합니다.
+                    window.location.href = `/projectPage?projectID=${projectID}`;
+                }
+            });
+            
         </script>
     </body>
 </html>

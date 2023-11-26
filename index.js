@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 const path = require('path');
 
 var client = mysql.createConnection({
+    host: 'localhost',
     user: 'root',
     password: '1234',
     database: 'CoWorkLink',
@@ -17,7 +18,7 @@ var app = express();
 app.use(express.urlencoded({
     extended: false
 }));
-
+app.use(express.json());
 // express-session 미들웨어 설정
 app.use(session({
     secret: 'secret-key',
@@ -181,13 +182,13 @@ app.get('/myProject', function(req, res){
     }
 });
 
-// 프로젝트 목록을 가져오는 엔드포인트
+// 프로젝트 목록을 가져오는 엔드포인트 -- myProject.html
 app.get('/getProjects', (req, res) => {
     // 세션에서 사용자 아이디를 가져옴 (세션에서 사용자 아이디를 저장하는 방법에 따라 다를 수 있음)
     const userID = req.session.userID;
 
     // 사용자 아이디를 기반으로 해당 사용자의 프로젝트 목록을 데이터베이스에서 가져오는 쿼리를 실행
-    const getProjectsQuery = 'SELECT projectName, deadline FROM projects WHERE userID = ?';
+    const getProjectsQuery = 'SELECT * FROM projects WHERE userID = ?';
 
     client.query(getProjectsQuery, [userID], (error, results) => {
         if (error) {
@@ -199,3 +200,95 @@ app.get('/getProjects', (req, res) => {
         }
     });
 });
+
+app.get('/projectPage', (req, res) => {
+    if (!req.session.isLoggedIn) {
+        res.redirect('/login');
+        return;
+    } else {
+        const projectID = req.query.projectID;
+
+        client.query(`SELECT projectName, projectInfo, deadline FROM projects WHERE projectID = ?`, [projectID], (error, projectInfo) => {
+            if (error) {
+                console.error('프로젝트 정보를 가져오는 중 오류 발생:', error);
+                res.status(500).json({ error: '내부 서버 오류' });
+            } else {
+                res.sendFile(path.join(__dirname, '/pages/projectPage.html'))
+            }
+        });
+    }
+});
+
+app.get('/getProjectInfo', (req, res) => {
+    const projectID = req.query.projectID;
+
+    client.query(`SELECT projectName, projectInfo, deadline FROM projects WHERE projectID = ?`, [projectID], (error, results) => {
+        if (error) {
+            console.error('프로젝트 정보를 가져오는 중 오류 발생:', error);
+            res.status(500).json({ error: '내부 서버 오류' });
+        } else {
+            const projectInfo = results[0]; // 결과에서 첫 번째 프로젝트 정보를 가져옴
+            res.json(projectInfo);
+        }
+    });
+});
+
+app.get('/getTeammates', (req, res) => {
+    const projectID = req.query.projectID;
+
+    // 프로젝트에 해당하는 초대된 팀원 정보 가져오기
+    const getTeammatesQuery = 'SELECT users.userID FROM users INNER JOIN invitations ON users.userID = invitations.userID WHERE invitations.projectID = ?';
+
+    client.query(getTeammatesQuery, [projectID], (error, results) => {
+        if (error) {
+            console.error('팀원 정보를 가져오는 중 오류 발생:', error);
+            res.status(500).json({ error: '내부 서버 오류' });
+        } else {
+            // 사용자 ID를 배열로 추출
+            const teammateUserIDs = results.map(result => result.userID);
+
+            // 배열을 한 줄씩 띄워서 클라이언트에 응답
+            const formattedTeammates = teammateUserIDs.join('\n');
+            res.send(formattedTeammates);
+        }
+    });
+});
+
+//프로젝트 페이지 프로젝트 정보 수정
+app.post('/editProjectInfo', (req, res) => {
+    const { projectId, projectName, projectInfo, deadline } = req.body;
+
+    const updateProjectQuery = 'UPDATE projects SET projectName=?, projectInfo=?, deadline=? WHERE projectID=?';
+
+    client.query(updateProjectQuery, [projectName, projectInfo, deadline, projectId], (error, results) => {
+        if (error) {
+            console.error('프로젝트 정보 수정 중 오류 발생:', error);
+            res.status(500).json({ success: false, error: '내부 서버 오류', message: error.message });
+        } else {
+            // 수정이 성공적으로 이루어졌을 때 응답
+            res.json({ success: true });
+        }
+    });
+});
+// /deleteTeammate 엔드포인트
+app.delete('/deleteTeammate', (req, res) => {
+    const { projectID, teammateID } = req.query; // req.query를 사용하여 쿼리 매개변수를 추출합니다.
+    console.log('Request to delete teammate. Project ID:', projectID, 'Teammate ID:', teammateID);
+    
+    const deleteTeammateQuery = 'DELETE FROM invitations WHERE projectID = ? AND userID = ?';
+    
+    client.query(deleteTeammateQuery, [projectID, teammateID], (error, results) => {
+        if (error) {
+            console.error('팀원 삭제 중 오류 발생:', error);
+            res.status(500).json({ success: false, error: '내부 서버 오류', message: error.message });
+        } else {
+            res.json({ success: true });
+        }
+    });
+});
+
+app.use((req, res, next) => {
+    console.log('Received request:', req.method, req.url);
+    next();
+});
+  

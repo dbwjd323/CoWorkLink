@@ -3,7 +3,6 @@
     flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
-    /* align-items: center; */
     text-align: center;
     background-color: #094275;
     color: #FED7D0;
@@ -36,13 +35,6 @@
 }
 
 .project-box {
-    /* background-color: #4978b9;
-    padding: 10px;
-    width: 25%;
-    height: 150px;
-    border-radius: 5px;
-    margin: 10px;
-    margin-top: 0; */
     background-color: #4978b9;
     padding: 20px;
     width: 300px;
@@ -58,24 +50,6 @@
 .project-box:hover {
     transform: scale(1.05);
 }
-
-/* .project-name {
-    font-size: 24px;
-    font-weight: bold;
-    margin-top: 8px;
-    margin-left: 20px;
-    display: flex;
-    color: white;
-    margin-bottom: 0;
-}
-
-.project-box span {
-    font-size: 14px;
-    margin-top: 20px;
-    margin-left: 20px;
-    display: flex;
-    color: white;
-} */
 
 .project-name {
     font-size: 24px;
