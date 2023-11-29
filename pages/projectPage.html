@@ -61,26 +61,77 @@
                               <label for="teammateListId">팀원 수정하기</label>
                             </ul>
                           </div>
-
+                          
                           <button type="button" class="btn_save" onclick="saveProject()">저장</button>
                           <button type="button" class="btn_close" onclick="closeEditProjectPopup()">닫기</button>
                         </div>
                       </div>
                     </div>
-                <div class="task-list-box">
+                <div class="task-list-container">
                     <div class="list-box-title">
                         <h2>작업 관리</h2>
-                        <button class="add-task-button">+</button>
+                        <button class="add-task-button" onclick="toggleAddTaskPopup()">+</button>
                     </div>
-                    <div class="list-box">
-                        <div class="taskname-condition">
-                            <h4>작업 이름</h4>
-                            <span class="condition">작업상태</span>
-                        </div>
-                        <div class="assign-div">
-                            <span class="assignedTo">담당자</span>
+                    <div class="list-box-container">
+                        <div class="list-box" onclick="openEditTaskPopup(1, 90)">
+                            <div class="taskname-condition">
+                                <h4 class="task-title">작업 이름</h4>
+                                <span class="condition">작업상태</span>
+                            </div>
+                            <div class="assign-div">
+                                <span class="assignedTo">담당자</span>
+                            </div>                        
                         </div>
                     </div>
+                </div>
+                <!-- 작업 수정 팝업 -->
+                <div id="edit-task-popup" class="edit-task-popup" style="display: none;">
+                    <div class="edit-task-inner">
+                        <h3>작업 수정</h3>
+
+                        <label for="taskName">작업 이름</label>
+                        <input type="text" id="editTaskName" name="taskName">
+
+                        <label for="taskStatus">진행 상태</label>
+                        <select id="editTaskStatus" name="taskStatus">
+                          <option value="작업 완료">작업 완료</option>
+                          <option value="작업 중">작업 중</option>
+                          <option value="작업 전">작업 전</option>
+                        </select>
+
+                        <label for="assignedTo">담당자</label>
+                        <select id="editAssignedTo" name="assignedTo">
+                            <!-- 여기에 서버에서 사용자 목록을 불러와서 옵션으로 추가 -->
+                        </select>
+
+                        <button type="button" id="editButton" onclick="saveTask()">수정</button>
+                        <button type="button" id="closeButton" onclick="closePopup('#edit-task-popup')">닫기</button>
+                    </div>
+                  </div>
+
+                <!-- 작업 관리 팝업 -->
+                <div class="add-task-popup" id="addTaskPopup" style="display:none;">
+                    <h2>작업 추가</h2>
+                    <div class="input-container">
+                        <label for="taskName">작업 이름</label>
+                        <input type="text" id="taskName" name="taskName" required>
+                    </div>
+                    <div class="input-container">
+                        <label for="assignedTo">담당자</label>
+                        <select id="assignedTo" name="assignedTo" required>
+                            <!-- 여기에 서버에서 사용자 목록을 불러와서 옵션으로 추가 -->
+                        </select>
+                    </div>
+                    <div class="input-container">
+                        <label for="taskStatus">진행 상태</label>
+                        <select id="taskStatus" name="taskStatus" required>
+                            <option value="작업 전">작업 전</option>
+                            <option value="작업 중">작업 중</option>
+                            <option value="작업 완료">작업 완료</option>
+                        </select>
+                    </div>
+                    <button type="button" onclick="addTask()">추가</button>
+                    <button type="button" onclick="closePopup('#addTaskPopup')">취소</button>
                 </div>
                 <div class="doc-list-box">
                     <!-- 문서 목록을 표시할 부분 -->

@@ -218,25 +218,29 @@ app.get('/projectPage', (req, res) => {
         });
     }
 });
-
+//프로젝트 정보 가져오기
 app.get('/getProjectInfo', (req, res) => {
     const projectID = req.query.projectID;
 
     client.query(`SELECT projectName, projectInfo, deadline FROM projects WHERE projectID = ?`, [projectID], (error, results) => {
         if (error) {
             console.error('프로젝트 정보를 가져오는 중 오류 발생:', error);
-            res.status(500).json({ error: '내부 서버 오류' });
+            res.status(500).json({ error: '내부 서버 오류', message: error.message });
         } else {
-            const projectInfo = results[0]; // 결과에서 첫 번째 프로젝트 정보를 가져옴
-            res.json(projectInfo);
+            if (results.length === 0) {
+                console.error('프로젝트를 찾을 수 없습니다. ID:', projectID);
+                res.status(404).json({ error: '프로젝트를 찾을 수 없습니다.' });
+            } else {
+                const projectInfo = results[0]; // 결과에서 첫 번째 프로젝트 정보를 가져옴
+                res.json(projectInfo);
+            }
         }
     });
 });
 
+// 프로젝트에 해당하는 초대된 팀원 정보 가져오기
 app.get('/getTeammates', (req, res) => {
     const projectID = req.query.projectID;
-
-    // 프로젝트에 해당하는 초대된 팀원 정보 가져오기
     const getTeammatesQuery = 'SELECT users.userID FROM users INNER JOIN invitations ON users.userID = invitations.userID WHERE invitations.projectID = ?';
 
     client.query(getTeammatesQuery, [projectID], (error, results) => {
@@ -270,7 +274,7 @@ app.post('/editProjectInfo', (req, res) => {
         }
     });
 });
-// /deleteTeammate 엔드포인트
+//팀원 삭제
 app.delete('/deleteTeammate', (req, res) => {
     const { projectID, teammateID } = req.query; // req.query를 사용하여 쿼리 매개변수를 추출합니다.
     console.log('Request to delete teammate. Project ID:', projectID, 'Teammate ID:', teammateID);
@@ -291,4 +295,108 @@ app.use((req, res, next) => {
     console.log('Received request:', req.method, req.url);
     next();
 });
+
+// 해당 프로젝트에 초대된 사용자 목록 가져오기
+app.get('/getUsersForTask', (req, res) => {
+    const projectID = req.query.projectID;
+    const getUsersForTaskQuery = 'SELECT users.userID, users.username FROM users INNER JOIN invitations ON users.userID = invitations.userID WHERE invitations.projectID = ?';
+
+    client.query(getUsersForTaskQuery, [projectID], (error, results) => {
+        if (error) {
+            console.error('프로젝트에 초대된 사용자 목록을 가져오는 중 오류 발생:', error);
+            res.status(500).json({ error: '내부 서버 오류' });
+        } else {
+            // 성공적으로 가져온 경우, JSON 형태로 클라이언트에 응답
+            res.json(results);
+        }
+    });
+});
+/// 작업 목록 가져오기
+app.get('/getTasks', (req, res) => {
+    const projectId = req.query.projectID; // 프로젝트 ID는 쿼리 파라미터로 전달됩니다.
   
+    if (!projectId) {
+      return res.status(400).json({ success: false, error: '프로젝트 ID가 제공되지 않았습니다.' });
+    }
+  
+    const getTasksQuery = `
+      SELECT taskID, taskName, assignedTo, taskStatus
+      FROM tasks
+      WHERE projectID = ?
+    `;
+  
+    client.query(getTasksQuery, [projectId], (error, results) => {
+      if (error) {
+        console.error('작업 목록을 불러오는 중 오류 발생:', error);
+        return res.status(500).json({ success: false, error: '내부 서버 오류', message: error.message });
+      }
+  
+      const tasks = results.map(task => ({
+        taskID: task.taskID,
+        taskName: task.taskName,
+        assignedTo: task.assignedTo,
+        taskStatus: task.taskStatus,
+      }));
+  
+      res.json({ success: true, tasks });
+    });
+});
+
+  //작업 추가 
+  app.post('/addTask', (req, res) => {
+    const { projectID, taskName, assignedTo, taskStatus } = req.body;
+
+    const insertQuery = 'INSERT INTO tasks (projectID, taskName, assignedTo, taskStatus) VALUES (?, ?, ?, ?)';
+    const values = [projectID, taskName, assignedTo, taskStatus];
+    // 응답
+    client.query(insertQuery, values, (err, result) => {
+        if (err) {
+            console.error('작업 추가 중 오류:', err);
+            res.status(500).send('작업 추가 중 오류가 발생했습니다.');
+            return;
+        }
+
+        console.log('작업이 성공적으로 추가되었습니다.');
+        res.status(200).send('작업이 성공적으로 추가되었습니다.');
+    });
+});
+
+app.get('/getTaskDetails', (req, res) => {
+    const taskID = req.query.taskID;
+    console.log(taskID);
+    const projectID = req.query.projectID;
+
+    const taskDetailsQuery = 'SELECT taskName, taskStatus, assignedTo FROM tasks WHERE taskID = ? AND projectID = ?';
+    client.query(taskDetailsQuery, [taskID, projectID], (error, results, fields) => {
+        if (error) {
+            console.error('작업 상세 정보를 가져오는 중 오류 발생:', error);
+            res.status(500).json({ error: '내부 서버 오류' });
+        } else {
+            // 성공적으로 가져온 경우, JSON 형태로 클라이언트에 응답
+            if (results.length > 0) {
+                res.json(results[0]); // 결과가 배열이므로 첫 번째 요소를 전송
+            } else {
+                res.status(404).json({ error: '작업을 찾을 수 없습니다.' });
+            }
+        }
+    });
+});
+
+app.post('/saveTask', (req, res) => {
+    const {taskID, projectID, taskName, taskStatus, assignedTo} = req.body;
+console.log(taskID);
+console.log(projectID);
+    if (!taskID || !projectID || !taskName || !taskStatus || !assignedTo) {
+        return res.status(400).json({ success: false, error: '잘못된 요청입니다. 필수 필드가 누락되었습니다.' });
+    }
+
+    const saveTaskQuery = 'UPDATE tasks SET taskName=?, taskStatus=?, assignedTo=? WHERE  taskID = ? AND projectID = ?';
+    client.query(saveTaskQuery, [taskName, taskStatus, assignedTo, taskID, projectID], (error, results) => {
+        if (error) {
+            console.error('작업 수정 중 오류 발생: ', error);
+            res.status(500).json({ success: false, error: '내부 서버 오류', message: error.message });
+        } else {
+            res.json({ success: true });
+        }
+    });
+});
