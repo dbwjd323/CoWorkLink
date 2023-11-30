@@ -153,9 +153,11 @@
                     }
                 } else {
                     alert(data.message);
-                    window.location.href = '/pages/myProject.html';
+                    window.location.href = '/myProject?id=' + data.projectId;
                 }
             })
+            
+            
             .catch(error => {
                 console.error('Error submitting form:', error);
             });

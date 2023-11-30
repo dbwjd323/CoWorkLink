@@ -119,7 +119,6 @@ app.get('/create', function(req, res){
 });
 
 app.post('/create', (req, res) => {
-    // console.log(req.body);
     const { projectName, projectInfo, deadline, invitedUserID } = req.body;
 
     // 항상 배열로 처리하도록 변경
@@ -139,33 +138,45 @@ app.post('/create', (req, res) => {
 
             if (nonExistingUserIDs.length > 0) {
                 // 존재하지 않는 사용자 ID가 있을 경우 에러 응답
-                // res.status(400).json({ error: '존재하지 않는 사용자 ID가 포함되어 있습니다.', nonExistingUserIDs });
-                res.redirect('/create');
+                const nonExistingUserNames = nonExistingUserIDs.join(', ');
+                const errorMessage = `다음 사용자 ID는 존재하지 않습니다: ${nonExistingUserNames}`;
+                res.status(400).json({ error: errorMessage, nonExistingUserIDs });
             } else {
-                // 초대할 사용자 ID가 모두 존재하면 프로젝트 및 초대 데이터 삽입 처리
-                const projectQuery = 'INSERT INTO projects (projectName, projectInfo, deadline, userID) VALUES (?, ?, ?, ?)';
-                client.query(projectQuery, [projectName, projectInfo, deadline, req.session.userID], (projectErr, projectResult) => {
-                    if (projectErr) {
-                        console.error('프로젝트 데이터 삽입 오류:', projectErr);
+                // 프로젝트 중복 체크
+                const checkProjectQuery = 'SELECT * FROM projects WHERE projectName = ? AND userID = ?';
+                client.query(checkProjectQuery, [projectName, req.session.userID], (checkProjectErr, checkProjectResults) => {
+                    if (checkProjectErr) {
+                        console.error('프로젝트 중복 체크 오류:', checkProjectErr);
                         res.status(500).send('내부 서버 오류');
                     } else {
-                        const projectId = projectResult.insertId;
+                        if (checkProjectResults.length > 0) {
+                            // 중복된 프로젝트가 이미 존재하는 경우 에러 응답
+                            res.status(400).json({ error: '이미 존재하는 프로젝트입니다.' });
+                        } else {
+                            // 초대할 사용자 ID가 모두 존재하고, 중복된 프로젝트가 없으면 프로젝트 생성 로직 실행
+                            const projectQuery = 'INSERT INTO projects (projectName, projectInfo, deadline, userID) VALUES (?, ?, ?, ?)';
+                            client.query(projectQuery, [projectName, projectInfo, deadline, req.session.userID], (projectErr, projectResult) => {
+                                if (projectErr) {
+                                    console.error('프로젝트 데이터 삽입 오류:', projectErr);
+                                    res.status(500).send('내부 서버 오류');
+                                } else {
+                                    const projectId = projectResult.insertId;
 
-                        // 초대 데이터 삽입 처리
-                        invitedUserIDs.forEach((userID) => {
-                            const invitationsQuery = 'INSERT INTO invitations (projectID, userID) VALUES (?, ?)';
-                            client.query(invitationsQuery, [projectId, userID], (invitationErr) => {
-                                if (invitationErr) {
-                                    console.error('초대 데이터 삽입 오류:', invitationErr);
+                                    // 초대 데이터 삽입 처리
+                                    invitedUserIDs.forEach((userID) => {
+                                        const invitationsQuery = 'INSERT INTO invitations (projectID, userID) VALUES (?, ?)';
+                                        client.query(invitationsQuery, [projectId, userID], (invitationErr) => {
+                                            if (invitationErr) {
+                                                console.error('초대 데이터 삽입 오류:', invitationErr);
+                                            }
+                                        });
+                                    });
+
+                                    var alertMessage = "프로젝트가 성공적으로 생성되었습니다.";
+                                    res.status(200).json({ success: true, message: alertMessage, projectId });
                                 }
                             });
-                        });
-
-                        var alertMessage = "프로젝트가 성공적으로 생성되었습니다.";
-                        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-                        res.write('<script>alert("' + alertMessage + '");</script>');
-                        res.write('<script>window.location.href="/pages/myProject.html";</script>');
-                        res.end();
+                        }
                     }
                 });
             }
@@ -188,7 +199,7 @@ app.get('/getProjects', (req, res) => {
     const userID = req.session.userID;
 
     // 사용자 아이디를 기반으로 해당 사용자의 프로젝트 목록을 데이터베이스에서 가져오는 쿼리를 실행
-    const getProjectsQuery = 'SELECT * FROM projects WHERE userID = ?';
+    const getProjectsQuery = 'SELECT * FROM projects WHERE userID = ? GROUP BY projectID';
 
     client.query(getProjectsQuery, [userID], (error, results) => {
         if (error) {
