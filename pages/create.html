@@ -34,14 +34,13 @@
                 </div>
                 <div class="team-group">
                     <label for="invitedUserID">Invite Team Member (ID)</label>
-                    <form id="invitedUserForm">
+                    
                         <div id="invitedUsers">
                             <div class="invited-users-row">
                                 <input type="text" name="invitedUserID" class="invitedUserID">
                             </div>
                         </div>
                         <button type="button" onclick="addInvitedUserInput()">+</button>
-                    </form>
                 </div>                    
 
                 <button class="submit-btn" onclick="submitForm()">Create Project</button>
@@ -102,20 +101,20 @@
         function submitForm() {
             const projectName = document.getElementById('projectName').value;
             const projectInfo = document.getElementById('projectInfo').value;
-            const deadline = document.getElementById('deadline').value;
+            const deadline = document.getElementById('deadline').value || null;
             const invitedUserInputs = document.querySelectorAll('.invitedUserID');
-
-            if (!projectName.trim() || !projectInfo.trim() || !deadline.trim()) {
-                alert('프로젝트 이름, 프로젝트 정보, 마감일을 입력하세요.');
+        
+            if (!projectName.trim() || !projectInfo.trim()) {
+                alert('프로젝트 이름과 프로젝트 정보는 필수 입력 사항입니다.');
                 return;
             }
-
+        
             // Check if at least one invited user ID is provided
             if (invitedUserInputs.length === 0 || invitedUserInputs[0].value.trim() === '') {
-                alert('초대된 사용자 ID를 입력하세요.');
+                alert('초대할 사용자 ID를 입력하세요.');
                 return;
             }
-
+        
             const invitedUserIDs = Array.from(invitedUserInputs).map(input => input.value.trim());
 
             // Prepare data for submission
@@ -123,9 +122,9 @@
                 projectName,
                 projectInfo,
                 deadline,
-                invitedUserID: invitedUserIDs
+                invitedUserIDs: Array.isArray(invitedUserIDs) ? invitedUserIDs : [invitedUserIDs]
             };
-
+        
             // Submit the form data to the server
             fetch('/create', {
                 method: 'POST',
@@ -134,34 +133,72 @@
                 },
                 body: JSON.stringify(formData),
             })
-            .then(response => {
-                // 서버 응답이 정상이면 JSON 형태로 변환하여 반환
-                if (response.ok) {
-                    return response.json();
-                }
-                // 서버 오류인 경우, 오류 응답을 JSON으로 파싱하여 예외 발생
-                throw new Error('서버 응답이 실패했습니다.');
-            })
+            .then(response => response.json())
             .then(data => {
-                if (data.error) {
-                    if (data.nonExistingUserIDs && data.nonExistingUserIDs.length > 0) {
-                        const nonExistingUserIDs = data.nonExistingUserIDs.join(', ');
-                        alert('존재하지 않는 사용자 ID가 포함되어 있습니다. 다시 확인하세요: ' + nonExistingUserIDs);
-                        window.location.href = '/create';
-                    } else {
-                        alert(data.error);
-                    }
-                } else {
+                if (data.success) {
                     alert(data.message);
                     window.location.href = '/myProject?id=' + data.projectId;
+                } else {
+                    // Provide more specific error messages based on server response
+                    if (data.nonExistingUserIDs && data.nonExistingUserIDs.length > 0) {
+                        const confirmation = confirm(`존재하지 않는 사용자 ID가 포함되어 있습니다. 다시 확인하세요: ${data.nonExistingUserIDs.join(', ')}`);
+
+                        if (confirmation) {
+                            // 아이디 입력 필드 비워두기
+                            const invitedUserInputs = document.querySelectorAll('.invitedUserID');
+                            invitedUserInputs.forEach(input => {
+                                input.value = '';
+                            });
+                            // 현재 입력된 데이터를 localStorage에 저장 (확인 버튼을 눌렀을 때만 저장)
+                const formDataToStore = {
+                    projectName,
+                    projectInfo,
+                    deadline,
+                    invitedUserIDs: Array.from(invitedUserInputs).map(input => input.value.trim())
+                };
+                localStorage.setItem('formData', JSON.stringify(formDataToStore));
+
+            
+                            // 프로젝트 생성 페이지로 이동
+                            window.location.href = '/create';
+                        }
+                    } else {
+                        alert('프로젝트 생성에 실패했습니다.');
+                    }
                 }
             })
-            
-            
             .catch(error => {
                 console.error('Error submitting form:', error);
+                alert('서버 응답이 실패했습니다.');
             });
         }
+        document.addEventListener('DOMContentLoaded', () => {
+            // localStorage에서 데이터를 불러옴 (확인 버튼을 눌렀을 때만 불러옴)
+            const storedFormData = localStorage.getItem('formData');
+        
+            if (storedFormData) {
+                const formData = JSON.parse(storedFormData);
+        
+                // 입력 필드에 데이터를 채워 넣음
+                document.getElementById('projectName').value = formData.projectName;
+                document.getElementById('projectInfo').value = formData.projectInfo;
+                document.getElementById('deadline').value = formData.deadline || '';
+        
+                const invitedUsersContainer = document.getElementById('invitedUsers');
+                invitedUsersContainer.innerHTML = '';
+                formData.invitedUserIDs.forEach(invitedUserID => {
+                    const newInput = document.createElement('input');
+                    newInput.type = 'text';
+                    newInput.name = 'invitedUserID';
+                    newInput.classList.add('invitedUserID');
+                    newInput.value = invitedUserID.trim();
+                    invitedUsersContainer.appendChild(newInput);
+                });
+        
+                // localStorage에 저장된 데이터 삭제
+                localStorage.removeItem('formData');
+            }
+        });
     </script>
 </body>
 </html>

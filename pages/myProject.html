@@ -68,9 +68,12 @@
                             projectNameElement.textContent = project.projectName;
 
                             const deadlineElement = document.createElement('span');
-                            const deadlineDate = new Date(project.deadline);
-                            deadlineElement.textContent = '마감일: ' + deadlineDate.toLocaleDateString();
-
+                            if (project.deadline) {
+                                const deadlineDate = new Date(project.deadline);
+                                deadlineElement.textContent = '마감일: ' + deadlineDate.toLocaleDateString();
+                            } else {
+                                deadlineElement.textContent = '마감일: 없음';
+                            }
                             // 프로젝트 상자에 요소를 추가
                             projectBox.appendChild(projectNameElement);
                             projectBox.appendChild(deadlineElement);
