@@ -1,9 +1,16 @@
 // fetch the template content for header
 fetch('/public/header.html')
-    .then(response => response.text())
-    .then(data => {
-        document.getElementById('header-placeholder').innerHTML = data;
-    });
+        .then(response => response.text())
+        .then(data => {
+            document.getElementById('header-placeholder').innerHTML = data;
+            return fetch('/getLoginStatus');
+        })
+        .then(response => response.json())
+        .then(data => {
+            const isLoggedIn = data.isLoggedIn;
+            updateUI(isLoggedIn);
+        })
+        .catch(error => console.error('로그인 상태를 가져오는 중 오류가 발생했습니다:', error));
 
 fetch('/public/navigation.html')
     .then(response => response.text())

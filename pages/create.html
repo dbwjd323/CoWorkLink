@@ -14,7 +14,7 @@
     
     <div class="create-container">
         <h2>Create Project</h2>
-        <form action="/create" method="post">
+        <form>
             <div class="form-container">
                 <div class="name-and-info-container">
                     <div class="name-group">
@@ -50,6 +50,7 @@
 
     <footer id="footer-placeholder"></footer>
     <script>
+
         // fetch the template content for header
         fetch('/public/header.html')
         .then(response => response.text())
@@ -97,84 +98,89 @@
             newInput.classList.add('invitedUserID');
             lastRow.appendChild(newInput);
         }
+//---------------------------------------
+function submitForm() {
+    const projectName = document.getElementById('projectName').value;
+    const projectInfo = document.getElementById('projectInfo').value;
+    const deadline = document.getElementById('deadline').value || '';
+  
+    // formattedDeadline 변수를 추가하여 빈 문자열인 경우 null로 설정
+    const formattedDeadline = deadline !== '' ? deadline : null;
+    const invitedUserInputs = document.querySelectorAll('.invitedUserID');
+  
+    // 최소한 하나의 초대된 사용자 ID가 제공되었는지 확인
+    if (invitedUserInputs.length === 0 || invitedUserInputs[0].value.trim() === '') {
+      alert('초대할 사용자 ID를 입력하세요.');
+      return;
+    }
+  
+    const invitedUserIDs = Array.from(invitedUserInputs).map(input => input.value.trim());
 
-        function submitForm() {
-            const projectName = document.getElementById('projectName').value;
-            const projectInfo = document.getElementById('projectInfo').value;
-            const deadline = document.getElementById('deadline').value || null;
+    // invitedUserIDs 배열이 배열인지 확인
+    if (!Array.isArray(invitedUserIDs) || invitedUserIDs[0] === null) {
+        alert('초대할 사용자 ID를 입력하세요.');
+        return;
+    }
+  
+    // 제출할 데이터 준비
+    const formData = {
+      projectName,
+      projectInfo,
+      deadline: formattedDeadline,
+      invitedUserIDs: invitedUserIDs
+    };
+  
+    // 서버에 폼 데이터 제출
+    fetch('/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(formData),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.href = '/myProject?id=' + data.projectId;
+         } else {
+        // 서버 응답을 기반으로 더 구체적인 오류 메시지 제공
+        if (data.nonExistingUserIDs && data.nonExistingUserIDs.length > 0) {
+          const confirmation = confirm(`존재하지 않는 사용자 ID가 포함되어 있습니다. 다시 확인하세요: ${data.nonExistingUserIDs.join(', ')}`);
+  
+          if (confirmation) {
+            // ID 입력 필드 비워두기
             const invitedUserInputs = document.querySelectorAll('.invitedUserID');
-        
-            if (!projectName.trim() || !projectInfo.trim()) {
-                alert('프로젝트 이름과 프로젝트 정보는 필수 입력 사항입니다.');
-                return;
-            }
-        
-            // Check if at least one invited user ID is provided
-            if (invitedUserInputs.length === 0 || invitedUserInputs[0].value.trim() === '') {
-                alert('초대할 사용자 ID를 입력하세요.');
-                return;
-            }
-        
-            const invitedUserIDs = Array.from(invitedUserInputs).map(input => input.value.trim());
-
-            // Prepare data for submission
-            const formData = {
-                projectName,
-                projectInfo,
-                deadline,
-                invitedUserIDs: Array.isArray(invitedUserIDs) ? invitedUserIDs : [invitedUserIDs]
-            };
-        
-            // Submit the form data to the server
-            fetch('/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(formData),
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert(data.message);
-                    window.location.href = '/myProject?id=' + data.projectId;
-                } else {
-                    // Provide more specific error messages based on server response
-                    if (data.nonExistingUserIDs && data.nonExistingUserIDs.length > 0) {
-                        const confirmation = confirm(`존재하지 않는 사용자 ID가 포함되어 있습니다. 다시 확인하세요: ${data.nonExistingUserIDs.join(', ')}`);
-
-                        if (confirmation) {
-                            // 아이디 입력 필드 비워두기
-                            const invitedUserInputs = document.querySelectorAll('.invitedUserID');
-                            invitedUserInputs.forEach(input => {
-                                input.value = '';
-                            });
-                            // 현재 입력된 데이터를 localStorage에 저장 (확인 버튼을 눌렀을 때만 저장)
-                const formDataToStore = {
-                    projectName,
-                    projectInfo,
-                    deadline,
-                    invitedUserIDs: Array.from(invitedUserInputs).map(input => input.value.trim())
-                };
-                localStorage.setItem('formData', JSON.stringify(formDataToStore));
-
-            
-                            // 프로젝트 생성 페이지로 이동
-                            window.location.href = '/create';
-                        }
-                    } else {
-                        alert('프로젝트 생성에 실패했습니다.');
-                    }
-                }
-            })
-            .catch(error => {
-                console.error('Error submitting form:', error);
-                alert('서버 응답이 실패했습니다.');
+            invitedUserInputs.forEach(input => {
+              input.value = '';
             });
+            // 현재 입력된 데이터를 sessionStorage에 저장 (확인 버튼을 눌렀을 때만 저장)
+            const formDataToStore = {
+              projectName,
+              projectInfo,
+              deadline,
+              invitedUserIDs: invitedUserIDs
+            };
+            sessionStorage.setItem('formData', JSON.stringify(formDataToStore));
+  
+            // 프로젝트 생성 페이지로 이동
+            window.location.href = '/create';
+          }
+        } else {
+          alert('프로젝트 생성에 실패했습니다.');
         }
+      }
+    })
+    .catch(error => {
+      console.error('폼 제출 중 오류 발생:', error);
+      alert('서버 응답이 실패했습니다.');
+    });
+  }
+  
+        
         document.addEventListener('DOMContentLoaded', () => {
-            // localStorage에서 데이터를 불러옴 (확인 버튼을 눌렀을 때만 불러옴)
-            const storedFormData = localStorage.getItem('formData');
+            // sessionStorage에서 데이터를 불러옴 (확인 버튼을 눌렀을 때만 불러옴)
+            const storedFormData = sessionStorage.getItem('formData');
         
             if (storedFormData) {
                 const formData = JSON.parse(storedFormData);
@@ -195,8 +201,8 @@
                     invitedUsersContainer.appendChild(newInput);
                 });
         
-                // localStorage에 저장된 데이터 삭제
-                localStorage.removeItem('formData');
+                // sessionStorage에 저장된 데이터 삭제
+                sessionStorage.removeItem('formData');
             }
         });
     </script>

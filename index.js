@@ -122,14 +122,9 @@ app.post('/create', (req, res) => {
     const { projectName, projectInfo, invitedUserIDs, deadline } = req.body;
     const invitedUserIDsArray = Array.isArray(invitedUserIDs) ? invitedUserIDs : [invitedUserIDs];
     
-    if (!projectName || !projectInfo || invitedUserIDsArray.length === 0) {
-        console.log('필수 입력 필드 누락');
-        res.status(400).json({ message: '필수 입력 필드를 입력하세요.' });
-        return;
-    }
     if (invitedUserIDsArray.length > 0) {
         const checkUsersQuery = 'SELECT * FROM users WHERE userID IN (?)';
-client.query(checkUsersQuery, [invitedUserIDsArray], (checkUsersErr, checkUsersResults) => {
+        client.query(checkUsersQuery, [invitedUserIDsArray], (checkUsersErr, checkUsersResults) => {
             if (checkUsersErr) {
                 console.error('사용자 확인 오류:', checkUsersErr);
                 res.status(500).send('내부 서버 오류');
@@ -158,17 +153,17 @@ client.query(checkUsersQuery, [invitedUserIDsArray], (checkUsersErr, checkUsersR
                 const projectId = projectResult.insertId;
 
                 // 초대 데이터 삽입 처리
-const invitationsQuery = 'INSERT INTO invitations (projectID, userID) VALUES ?';
-const values = invitedUserIDsArray.map(userID => [projectId, userID]);
+                const invitationsQuery = 'INSERT INTO invitations (projectID, userID) VALUES ?';
+                const values = invitedUserIDsArray.map(userID => [projectId, userID]);
 
-client.query(invitationsQuery, [values], (invitationErr) => {
-    if (invitationErr) {
-        console.error('초대 데이터 삽입 오류:', invitationErr);
-    }
+                client.query(invitationsQuery, [values], (invitationErr) => {
+                    if (invitationErr) {
+                        console.error('초대 데이터 삽입 오류:', invitationErr);
+                    }
 
-    const alertMessage = "프로젝트가 성공적으로 생성되었습니다.";
-    res.status(200).json({ success: true, message: alertMessage, projectId });
-});
+                    const alertMessage = "프로젝트가 성공적으로 생성되었습니다.";
+                    res.status(200).json({ success: true, message: alertMessage, projectId });
+                });
 
             });
         });
