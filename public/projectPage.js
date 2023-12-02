@@ -118,6 +118,7 @@ function openEditProjectPopup() {
     document.getElementById('editProjectName').value = projectName;
     document.getElementById('editProjectInfo').value = projectInfo;
     document.getElementById('editDeadline').value = deadline;
+    document.getElementById('teammateList').innerHTML = '';
 
     fetch(`/getTeammates?projectID=${projectId}`)
     .then(response => {
@@ -130,8 +131,10 @@ function openEditProjectPopup() {
       const teammateElement = document.getElementById('teammateList');
       const teammatesArray = teammates.split('\n');
       teammatesArray.forEach((teammate) => {
-        teammateElement.innerHTML += `<li><span>${teammate}</span><button class="delete-btn" onclick="deleteTeammate('${teammate}')">삭제</button></li>`;
-      });
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `<span>${teammate}</span><button class="delete-btn" onclick="deleteTeammate('${teammate}')">삭제</button>`;
+        document.getElementById('teammateList').appendChild(listItem);
+    });
 
       // 팀원 아이디를 전역 변수에 저장합니다.
       window.projectTeammates = teammatesArray;
@@ -181,6 +184,9 @@ function closeEditProjectPopup() {
     if (editProjectForm) {
         editProjectForm.reset();
     }
+    // 수정 팝업을 닫을 때 URL에서 #edit_project_pop를 제거
+    history.pushState("", document.title, window.location.pathname + window.location.search);
+
     closePopup('#edit_project_pop');  // 아이디 전달 수정
 }
 
@@ -223,7 +229,7 @@ function saveProject() {
 function updatePageContent(projectId) {
     displayProjectInfo(projectId);
 }
-
+//-----------------------------------------------------------------------------------------------------------------------------------//
 //작업 관리 팝업 열기
 function toggleAddTaskPopup() {
     const addTaskPopup = document.getElementById('addTaskPopup');

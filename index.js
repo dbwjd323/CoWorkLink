@@ -222,7 +222,7 @@ app.get('/getProjects', (req, res) => {
     });
 });
 
-
+//----------------------------------------------------------------------------------------------------------------//
 app.get('/projectPage', (req, res) => {
     if (!req.session.isLoggedIn) {
         res.redirect('/login');
