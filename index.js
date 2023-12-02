@@ -119,7 +119,7 @@ app.get('/create', function(req, res){
 });
 app.post('/create', (req, res) => {
     console.log('클라이언트 요청 수신:', req.body);
-    const { projectName, projectInfo, deadline, invitedUserIDs} = req.body;
+    const { projectName, projectInfo, deadline, invitedUserIDs } = req.body;
     const invitedUserIDsArray = Array.isArray(invitedUserIDs) ? invitedUserIDs : [invitedUserIDs];
 
     if (!projectName || !projectInfo || invitedUserIDsArray.length === 0) {
@@ -127,6 +127,7 @@ app.post('/create', (req, res) => {
         res.status(400).json({ message: '필수 입력 필드를 입력하세요.' });
         return;
     }
+
     if (invitedUserIDsArray.length > 0) {
         const checkUsersQuery = 'SELECT * FROM users WHERE userID IN (?)';
         client.query(checkUsersQuery, [invitedUserIDsArray], (checkUsersErr, checkUsersResults) => {
@@ -140,42 +141,54 @@ app.post('/create', (req, res) => {
             const nonExistingUserIDs = invitedUserIDsArray.filter(userID => !checkUsersResults.map(user => (user.userID || '')).includes(userID));
 
             if (nonExistingUserIDs.length > 0) {
-            const alertMessage = `존재하지 않는 사용자 ID가 포함되어 있습니다. 다시 확인하세요: ${nonExistingUserIDs.join(', ')}`;
-            res.status(400).json({ message: alertMessage, nonExistingUserIDs });
-            return;
-        }
-
-        // 존재하는 사용자들에 대한 처리
-        // 프로젝트 생성 로직 실행
-        const projectQuery = 'INSERT INTO projects (projectName, projectInfo, deadline, userID) VALUES (?, ?, ?, ?)';
-        client.query(projectQuery, [projectName, projectInfo, deadline, req.session.userID], (projectErr, projectResult) => {
-            if (projectErr) {
-                console.error('프로젝트 데이터 삽입 오류:', projectErr);
-                res.status(500).send('내부 서버 오류');
+                const alertMessage = `존재하지 않는 사용자 ID가 포함되어 있습니다. 다시 확인하세요: ${nonExistingUserIDs.join(', ')}`;
+                res.status(400).json({ message: alertMessage, nonExistingUserIDs });
                 return;
             }
 
-            const projectId = projectResult.insertId;
+            // 존재하는 사용자들에 대한 처리
+            // 프로젝트 생성 로직 실행
+            const projectQuery = 'INSERT INTO projects (projectName, projectInfo, deadline, userID) VALUES (?, ?, ?, ?)';
+            client.query(projectQuery, [projectName, projectInfo, deadline, req.session.userID], (projectErr, projectResult) => {
+                if (projectErr) {
+                    console.error('프로젝트 데이터 삽입 오류:', projectErr);
+                    res.status(500).send('내부 서버 오류');
+                    return;
+                }
 
-            // 초대 데이터 삽입 처리
-            const invitationsQuery = 'INSERT INTO invitations (projectID, userID) VALUES ?';
-            const values = invitedUserIDsArray.map(userID => [projectId, userID]);
+                const projectId = projectResult.insertId;
 
-            client.query(invitationsQuery, [values], (invitationErr) => {
-            if (invitationErr) {
-                console.error('초대 데이터 삽입 오류:', invitationErr);
-            }
+                // 초대 데이터 삽입 처리
+                const invitationsQuery = 'INSERT INTO invitations (projectID, userID) VALUES ?';
+                const values = invitedUserIDsArray.map(userID => [projectId, userID]);
 
-            const alertMessage = "프로젝트가 성공적으로 생성되었습니다.";
-            res.status(200).json({ success: true, message: alertMessage, projectId });
+                client.query(invitationsQuery, [values], (invitationErr) => {
+                    if (invitationErr) {
+                        console.error('초대 데이터 삽입 오류:', invitationErr);
+                        res.status(500).send('내부 서버 오류');
+                        return;
+                    }
+
+                    // 'user_projects' 테이블에 팀원과 프로젝트 간의 연결을 추가
+                    const userProjectsQuery = 'INSERT INTO user_projects (user_id, project_id) VALUES ?';
+                    const userProjectsValues = invitedUserIDsArray.map(userID => [userID, projectId]);
+
+                    client.query(userProjectsQuery, [userProjectsValues], (userProjectsErr) => {
+                        if (userProjectsErr) {
+                            console.error('user_projects 테이블 삽입 오류:', userProjectsErr);
+                            res.status(500).send('내부 서버 오류');
+                            return;
+                        }
+
+                        const alertMessage = "프로젝트가 성공적으로 생성되었습니다.";
+                        res.status(200).json({ success: true, message: alertMessage, projectId });
+                    });
+                });
             });
-
         });
-    });
-}
+    }
 });
-
-
+//----------------------------------------------------------------------------------------------------------------------//
 app.get('/myProject', function(req, res){
     if (!req.session.isLoggedIn) {
         res.redirect('/login');
@@ -185,13 +198,18 @@ app.get('/myProject', function(req, res){
     }
 });
 
-// 프로젝트 목록을 가져오는 엔드포인트 -- myProject.html
+// myProject에서 프로젝트 목록을 가져오는 엔드포인트
 app.get('/getProjects', (req, res) => {
     // 세션에서 사용자 아이디를 가져옴 (세션에서 사용자 아이디를 저장하는 방법에 따라 다를 수 있음)
     const userID = req.session.userID;
 
-    // 사용자 아이디를 기반으로 해당 사용자의 프로젝트 목록을 데이터베이스에서 가져오는 쿼리를 실행
-    const getProjectsQuery = 'SELECT * FROM projects WHERE userID = ? GROUP BY projectID';
+    // 'user_projects' 테이블을 사용하여 해당 사용자가 속한 프로젝트 목록을 가져오는 쿼리
+    const getProjectsQuery = `
+        SELECT projects.projectID, projects.projectName, projects.projectInfo, projects.deadline
+        FROM projects
+        INNER JOIN user_projects ON projects.projectID = user_projects.project_id
+        WHERE user_projects.user_id = ?
+    `;
 
     client.query(getProjectsQuery, [userID], (error, results) => {
         if (error) {
@@ -203,6 +221,7 @@ app.get('/getProjects', (req, res) => {
         }
     });
 });
+
 
 app.get('/projectPage', (req, res) => {
     if (!req.session.isLoggedIn) {
