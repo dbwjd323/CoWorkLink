@@ -118,8 +118,9 @@ app.get('/create', function(req, res){
     }
 });
 app.post('/create', (req, res) => {
+    const { projectName, projectInfo, deadline, invitedUserIDs } = req.body;
     console.log('클라이언트 요청 수신:', req.body);
-    const { projectName, projectInfo, invitedUserIDs, deadline } = req.body;
+
     const invitedUserIDsArray = Array.isArray(invitedUserIDs) ? invitedUserIDs : [invitedUserIDs];
     
     if (invitedUserIDsArray.length > 0) {
@@ -160,9 +161,7 @@ app.post('/create', (req, res) => {
                     if (invitationErr) {
                         console.error('초대 데이터 삽입 오류:', invitationErr);
                     }
-
-                    const alertMessage = "프로젝트가 성공적으로 생성되었습니다.";
-                    res.status(200).json({ success: true, message: alertMessage, projectId });
+                    res.status(200).json({ success: true, message: '프로젝트가 성공적으로 생성되었습니다.' });
                 });
 
             });
