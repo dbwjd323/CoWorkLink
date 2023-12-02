@@ -24,7 +24,6 @@
                 </div>
             </div>
         </form>
-
         <footer id="footer-placeholder"></footer>
         <script>
             // fetch the template content for header
@@ -32,27 +31,17 @@
             .then(response => response.text())
             .then(data => {
                 document.getElementById('header-placeholder').innerHTML = data;
-                return fetch('/getLoginStatus');
-            })
-            .then(response => response.json())
-            .then(data => {
-                const isLoggedIn = data.isLoggedIn;
-                updateUI(isLoggedIn);
-            })
-            .catch(error => console.error('로그인 상태를 가져오는 중 오류가 발생했습니다:', error));
-
+            });
             fetch('/public/navigation.html')
             .then(response => response.text())
             .then(data => {
                 document.getElementById('navigation-placeholder').innerHTML = data;
             });
-
             fetch('/public/footer.html')
             .then(response => response.text())
             .then(data => {
                 document.getElementById('footer-placeholder').innerHTML = data;
             });
-
             // 서버에서 프로젝트 목록을 가져와 표시하는 함수
             function displayProjects() {
                 fetch('/getProjects')
@@ -60,16 +49,13 @@
                     .then(data => {
                         // 프로젝트 목록을 가져왔을 때 실행할 동작
                         const projectListContainer = document.querySelector('.project-box-container');
-
                         // 기존의 프로젝트 상자들을 모두 제거
                         projectListContainer.innerHTML = '';
-
                         // 가져온 프로젝트 데이터를 사용하여 동적으로 프로젝트 상자 생성
                         data.forEach(project => {
                             const projectBox = document.createElement('div');
                             projectBox.classList.add('project-box');
                             projectBox.setAttribute('data-project-id', project.projectID);
-
                             const projectNameElement = document.createElement('p');
                             projectNameElement.classList.add('project-name');
                             projectNameElement.textContent = project.projectName;
@@ -84,7 +70,6 @@
                             // 프로젝트 상자에 요소를 추가
                             projectBox.appendChild(projectNameElement);
                             projectBox.appendChild(deadlineElement);
-
                             // 프로젝트 목록 컨테이너에 프로젝트 상자를 추가
                             projectListContainer.appendChild(projectBox);
                         });
@@ -93,7 +78,6 @@
             }
             // 페이지 로드 시 프로젝트 목록을 표시
             document.addEventListener('DOMContentLoaded', displayProjects);
-
             // 프로젝트 상자에 대한 클릭 이벤트 처리
             document.addEventListener('click', (event) => {
                 // 클릭된 요소가 프로젝트 상자인지 확인
