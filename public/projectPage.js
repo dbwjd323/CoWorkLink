@@ -81,7 +81,7 @@ function displayProjectInfo() {
                 })
                 .catch(error => console.error('팀원 정보를 가져오는 중 오류 발생:', error.message));
             
-            // 작업 목록 표시
+            //작업 목록 표시
             displayTasks(projectId);
         })
         .catch(error => console.error('프로젝트 정보를 가져오는 중 오류 발생:', error.message));
@@ -216,7 +216,7 @@ function saveProject() {
         if (response.status === 200) {
             alert('프로젝트 정보를 성공적으로 저장했습니다.');
             closeEditProjectPopup();
-            updatePageContent(projectId);
+            updatePageContent();
         } else {
           console.error('프로젝트 정보를 저장하는 중 오류가 발생했습니다.');
         }
@@ -226,25 +226,92 @@ function saveProject() {
       });
 }
 
-function updatePageContent(projectId) {
-    displayProjectInfo(projectId);
-}
+function updatePageContent() {
+const projectId = new URLSearchParams(window.location.search).get('projectID');
+  displayProjectInfo(projectId);}
 //-----------------------------------------------------------------------------------------------------------------------------------//
-//작업 관리 팝업 열기
+// 작업 추가 팝업 열기
 function toggleAddTaskPopup() {
     const addTaskPopup = document.getElementById('addTaskPopup');
     if (addTaskPopup.style.display === 'none') {
-        addTaskPopup.style.display = 'block';
+        // 프로젝트 ID를 설정해줘야 함
+        const urlParams = new URLSearchParams(window.location.search);
+        const projectId = urlParams.get('projectID');
+        console.log("Project ID:", projectId);
+
+        // 사용자 목록을 먼저 불러오기
+        loadUsersForTask(projectId)
+            .then(() => {
+                // 팝업 열기
+                if (projectId) {
+                    addTaskPopup.style.display = 'block';
+                    // 작업 목록을 업데이트합니다.
+                    displayTasks(projectId);
+                } else {
+                    alert('프로젝트 ID가 없습니다.');
+                }
+            })
+            .catch(error => {
+                console.error('사용자 목록을 불러오는 중 오류 발생:', error.message);
+            });
     } else {
         addTaskPopup.style.display = 'none';
     }
 }
 
-// 작업 관리 팝업이 열릴 때 사용자 목록을 서버에서 가져와 옵션으로 추가하는 함수
-function loadUsersForTask(projectID) {
-    const assignedToSelect = document.getElementById('assignedTo');
+// 작업 추가 함수
+function addTask() {
+    // assignedTo 드롭다운 메뉴에서 사용자 ID 가져오기
+    const assignedTo = document.getElementById('assignedTo').value;
+   // 프로젝트 ID 가져오기
+   const projectId = window.location.search.substring(1).split('&')[0].split('=')[1];
+  
+    // loadUsersForTask() 함수를 호출하여 사용자 목록을 가져옴
+    loadUsersForTask(projectId);
+  
+    // 나머지 작업 정보 가져오기
+    const taskName = document.getElementById('taskName').value;
+    const taskStatus = document.getElementById('taskStatus').value;
+  
+    if (taskName.trim() === '' || assignedTo.trim() === '' || taskStatus.trim() === '') {
+        alert('모든 필수 항목을 입력하세요.');
+        return; // 필수 입력 필드가 비어 있으면 함수를 종료합니다.
+    }
+    // 작업 추가
+    fetch(`/addTask?projectID=${projectId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        projectID: projectId,
+        taskName: taskName,
+        assignedTo: assignedTo,
+        taskStatus: taskStatus,
+      }),
+    })
+    .then(response => {
+      if (response.status === 200) {
+        alert('작업을 성공적으로 추가했습니다.');
+        closePopup('#addTaskPopup');
+        displayTasks(projectId);
+      } else {
+        console.error('작업을 추가하는 중 오류가 발생했습니다.', response.error);
+        alert(`작업 추가 중 오류: ${response.error}`);
+      }
+    })
+    .catch(error => {
+      console.error('작업 추가 중 오류 발생:', error.message);
+    });
+  }  
 
-    fetch(`/getUsersForTask?projectID=${projectID}`)
+
+// 작업 관리 팝업이 열릴 때 사용자 목록을 서버에서 가져와 옵션으로 추가하는 함수
+function loadUsersForTask(projectId) {
+    const assignedToSelect = document.getElementById('assignedTo');
+    // const projectId = window.location.search.substring(1).split('&')[0].split('=')[1];
+
+    return fetch(`/getUsersForTask?projectID=${projectId}`)
         .then(response => {
             if (!response.ok) {
                 throw new Error('서버 응답이 올바르지 않습니다.');
@@ -257,34 +324,31 @@ function loadUsersForTask(projectID) {
             // 서버에서 받은 사용자 목록을 옵션으로 추가
             users.forEach(user => {
                 const option = document.createElement('option');
-                option.value = user.userID; // 또는 원하는 사용자 식별자로 수정
-                option.textContent = user.username; // 또는 다른 사용자 정보로 수정
+                option.value = user.userID;
+                option.textContent = user.username;
                 assignedToSelect.appendChild(option);
             });
         })
-        .catch(error => console.error('사용자 목록을 불러오는 중 오류 발생:', error.message));
+        .catch(error => {
+            console.error('사용자 목록을 불러오는 중 오류 발생:', error.message);
+            throw error; // Promise 체인에서 오류를 전파합니다.
+        });
 }
 
-// 페이지 로드 시 작업 관리 팝업이 열릴 때 사용자 목록을 불러옵니다.
-document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const projectID = urlParams.get('projectID');
-    loadUsersForTask(projectID);
-    displayTasks(projectID);
-});
 
 // 작업 리스트 가져오기
 function displayTasks(projectId) {
+    const TaskListContainer = document.querySelector('.list-box-container');
+    TaskListContainer.innerHTML = '';
+
     fetch(`/getTasks?projectID=${projectId}`)
         .then(response => response.json())
         .then(data => {
-            const TaskListContainer = document.querySelector('.list-box-container');
-            TaskListContainer.innerHTML = '';
-
             data.tasks.forEach(task => {
                 const taskBox = document.createElement('div');
                 taskBox.classList.add('list-box');
                 taskBox.setAttribute('data-task-id', task.taskID);
+                taskBox.setAttribute('data-project-id', projectId);
 
                 const taskNameConditionContainer = document.createElement('div');
                 taskNameConditionContainer.classList.add('taskname-condition');
@@ -307,50 +371,14 @@ function displayTasks(projectId) {
                 taskBox.appendChild(taskNameConditionContainer);
                 taskBox.appendChild(assignElement);
 
+                // 기존 목록 맨 위에 새 작업 추가
                 TaskListContainer.appendChild(taskBox);
 
                 taskBox.addEventListener('click', () => openEditTaskPopup(task.taskID, projectId));
+                
             });
         })
         .catch(error => console.error('작업 목록을 가져오는 중 오류 발생:', error));
-}
-
-// 작업 추가 함수
-function addTask() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const projectId = urlParams.get('projectID');
-    
-    // 입력된 작업 정보 가져오기
-    const taskName = document.getElementById('taskName').value;
-    const assignedTo = document.getElementById('assignedTo').value;
-    const taskStatus = document.getElementById('taskStatus').value;
-
-    // 작업 정보를 서버에 전송
-    fetch('/addTask', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            projectID: projectId,
-            taskName: taskName,
-            assignedTo: assignedTo,
-            taskStatus: taskStatus,
-        }),
-    })
-    .then(response => {
-        if (response.status === 200) {
-            alert('작업을 성공적으로 추가했습니다.');
-            closePopup('#addTaskPopup');
-            // 작업 목록을 업데이트합니다.
-            displayTasks(projectId);
-        } else {
-            console.error('서버에서 오류 응답:', response.status, response.statusText);
-        }
-    })
-    .catch(error => {
-        console.error('작업 추가 중 오류 발생:', error.message);
-    });
 }
 
 // 작업 수정 팝업 열기
@@ -417,37 +445,40 @@ function saveTask(taskID, projectID) {
   
     // 서버에 수정된 작업 정보 보내기
     fetch('/saveTask', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            taskID: taskID,
-            projectID: projectID,
-            taskName: editedTaskName,
-            taskStatus: editedTaskStatus,
-            assignedTo: editedAssignedTo,
-        }),
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        taskID: taskID,
+        projectID: projectID,
+        taskName: editedTaskName,
+        taskStatus: editedTaskStatus,
+        assignedTo: editedAssignedTo,
+      }),
     })
     .then(response => {
-        if (!response.ok) {
-            throw new Error('서버 응답이 올바르지 않습니다.');
-        }
+      if (response.status === 200) {
+        // 작업이 성공적으로 수정되었습니다.
         return response.json();
+      } else {
+        throw new Error('서버 응답이 올바르지 않습니다.');
+      }
     })
     .then(result => {
-        if (result.success) {
-            // 작업이 성공적으로 수정되었을 때만 알람창을 띄웁니다.
-            console.log('작업이 성공적으로 수정되었습니다.');
-            alert('작업이 성공적으로 수정되었습니다.');
-            closePopup('#edit-task-popup');
-
-            location.reload();
-        } else {
-            console.error('작업을 저장하는 중 오류가 발생했습니다.', result.error);
-            alert(`작업 저장 중 오류: ${result.error}`);
-        }
+      if (result.success) {
+        // 작업이 성공적으로 수정되었을 때만 알람창을 띄웁니다.
+        console.log('작업이 성공적으로 수정되었습니다.');
+        alert('작업이 성공적으로 수정되었습니다.');
+        closePopup('#edit-task-popup');
+  
+        displayTasks(projectID);
+      } else {
+        console.error('작업을 저장하는 중 오류가 발생했습니다.', result.error);
+        alert(`작업 저장 중 오류: ${result.error}`);
+      }
     })
     .catch(error => console.error('작업을 저장하는 중 오류 발생:', error.message));
-}
+  }
+  
 

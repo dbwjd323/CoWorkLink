@@ -74,11 +74,11 @@
                     <div class="list-box-container">
                         <div class="list-box" onclick="openEditTaskPopup(1, 90)">
                             <div class="taskname-condition">
-                                <h4 class="task-title">작업 이름</h4>
-                                <span class="condition">작업상태</span>
+                                <h4 class="task-title"></h4>
+                                <span class="condition"></span>
                             </div>
                             <div class="assign-div">
-                                <span class="assignedTo">담당자</span>
+                                <span class="assignedTo"></span>
                             </div>                        
                         </div>
                     </div>
@@ -108,7 +108,7 @@
                     </div>
                   </div>
 
-                <!-- 작업 관리 팝업 -->
+                <!-- 작업 추가 팝업 -->
                 <div class="add-task-popup" id="addTaskPopup" style="display:none;">
                     <h2>작업 추가</h2>
                     <div class="input-container">
@@ -129,7 +129,7 @@
                             <option value="작업 완료">작업 완료</option>
                         </select>
                     </div>
-                    <button type="button" onclick="addTask()">추가</button>
+                    <button class="addTaskBtn" type="button" onclick="addTask()">추가</button>
                     <button type="button" onclick="closePopup('#addTaskPopup')">취소</button>
                 </div>
                 <div class="doc-list-box">
