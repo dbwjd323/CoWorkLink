@@ -442,3 +442,79 @@ console.log(projectID);
         }
     });
 });
+//mypage--------------------------------------------------------------------------------------------------------------------------------------//
+app.get('/myPage', function(req, res){
+    if (!req.session.isLoggedIn) {
+        res.redirect('/login');
+        return;
+    } else {
+        res.sendFile(path.join(__dirname, '/pages/myPage.html'))
+    }
+});
+//사용자 정보를 가져오는 엔드포인트
+app.get('/myPageData', function(req, res){
+    if (!req.session.isLoggedIn) {
+        res.redirect('/login');
+        return;
+    } else {
+        const userID = req.session.userID;
+        client.query(`SELECT username, password, email FROM users WHERE userID = ?`, [userID], (error, result) => {
+            if (error) {
+                console.error('Error fetching user data:', error);
+                res.status(500).json({ error: 'Internal Server Error' });
+            } else {
+                const userData = result[0];
+                res.json({
+                    username: userData.username,
+                    email: userData.email,
+                });
+            }
+        });
+    }
+});
+// 사용자 이름을 업데이트하는 엔드포인트
+app.post('/updateUsername', (req, res)=>{
+    const userID = req.session.userID;
+    const username = req.body.username;
+    console.log(userID);
+    console.log(username);
+    const updateNameQuery = 'UPDATE users SET username=? WHERE userID=?';
+    client.query(updateNameQuery, [username, userID],(error, results)=>{
+        if(error){
+            console.error('사용자 이름 수정 중 오류 발생:' , error);
+            res.status(500).json({success: false, error:'내부 서버 오류', message: error.message});
+        } else{
+            res.json({success: true});
+        }
+    } )
+})
+//사용자 비밀번호 업데이트
+app.post('/updatePassword', (req, res)=>{
+    const userID = req.session.userID;
+    const password = req.body.password;
+    console.log(password);
+    const updatePswdQuery = 'UPDATE users SET password=? WHERE userID=?';
+    client.query(updatePswdQuery, [password, userID],(error, results)=>{
+        if(error){
+            console.error('사용자 pswd 수정 중 오류 발생:' , error);
+            res.status(500).json({success: false, error:'내부 서버 오류', message: error.message});
+        } else{
+            res.json({success: true});
+        }
+    } )
+})
+//사용자 이메일 업데이트
+app.post('/updateEmail', (req, res)=>{
+    const userID = req.session.userID;
+    const email = req.body.email;
+    console.log(email);
+    const updateEmailQuery = 'UPDATE users SET email=? WHERE userID=?';
+    client.query(updateEmailQuery, [email, userID],(error, results)=>{
+        if(error){
+            console.error('사용자 email 수정 중 오류 발생:' , error);
+            res.status(500).json({success: false, error:'내부 서버 오류', message: error.message});
+        } else{
+            res.json({success: true});
+        }
+    } )
+})
