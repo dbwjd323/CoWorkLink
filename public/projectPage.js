@@ -455,5 +455,14 @@ function saveTask(taskID, projectID) {
   // 채팅 페이지로 이동
   function openChatPage() {
     const projectID = window.location.href.split("?")[1].split("=")[1];
-    window.location.href = '/chat?projectID=' + projectID;
+
+    const chatPageURL = '/chat?projectID=' + projectID;
+
+    // 작은 창으로 열기
+    const chatWindow = window.open(chatPageURL, 'ChatWindow', 'width=440, height=610, resizable=no');
+    
+    // 창이 이미 열려있으면 포커스
+    if (chatWindow) {
+        chatWindow.focus();
+    }
 }

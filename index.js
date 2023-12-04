@@ -27,8 +27,7 @@ var http = require('http');
 var socketio = require('socket.io');
 var server = http.createServer(app);
 
-var io = socketio();
-io.attach(server);
+var io = socketio(server);
 
 app.use(express.static(path.join(__dirname, "node_modules")));
 
@@ -41,13 +40,20 @@ server.listen(3001, function(){
 });
 
 // 채팅 메시지 보내기
-io.on("connection", (socket) => {
-    socket.on("message", (data) => {
-      // 클라이언트로부터 메시지를 수신하면
-      // 모든 클라이언트에게 메시지를 전송합니다.
-      io.emit("message", data);
+io.on('connection', (socket) => {
+    console.log('새로운 사용자가 연결되었습니다.');
+  
+    // 클라이언트에서 보낸 채팅 메시지 수신
+    socket.on('chat message', (message) => {
+      console.log('수신한 메시지:', message);
+      // 모든 클라이언트에게 채팅 메시지 전송
+      io.emit('chat message', message);
     });
   });
+
+app.get('/chat', function(req, res){
+    res.sendFile(path.join(__dirname, 'pages/chat.html'))
+});
 
 // 라우트 실행
 app.get('/', (req, res) => {
@@ -418,25 +424,6 @@ app.get('/getTaskDetails', (req, res) => {
     });
 });
 
-// app.post('/saveTask', (req, res) => {
-//     const {taskID, projectID, taskName, taskStatus, assignedTo} = req.body;
-// console.log(taskID);
-// console.log(projectID);
-//     if (!taskID || !projectID || !taskName || !taskStatus || !assignedTo) {
-//         return res.status(400).json({ success: false, error: '잘못된 요청입니다. 필수 필드가 누락되었습니다.' });
-//     }
-
-//     const saveTaskQuery = 'UPDATE tasks SET taskName=?, taskStatus=?, assignedTo=? WHERE  taskID = ? AND projectID = ?';
-//     client.query(saveTaskQuery, [taskName, taskStatus, assignedTo, taskID, projectID], (error, results) => {
-//         if (error) {
-//             console.error('작업 수정 중 오류 발생: ', error);
-//             res.status(500).json({ success: false, error: '내부 서버 오류', message: error.message });
-//         } else {
-//             res.json({ success: true });
-//         }
-//     });
-// });
-
 app.post('/saveTask', (req, res) => {
     const {taskID, projectID, taskName, taskStatus, assignedTo} = req.body;
 console.log(taskID);
@@ -454,8 +441,4 @@ console.log(projectID);
             res.json({ success: true });
         }
     });
-});
-
-app.get('/chat', function(req, res){
-    res.sendFile(path.join(__dirname, 'pages/chat.html'))
 });

@@ -1,0 +1,88 @@
+body {
+    font-family: sans-serif;
+    margin: 20px;
+    background-color: rgb(179, 207, 242);
+  }
+  
+  .chatting {
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 0 auto;
+    width: 350px;
+  }
+  
+  .chatting h2 {
+    margin: 0 0 20px;
+    font-size: 1.5em;
+    text-align: center;
+    color: #343a40;
+  }
+  
+  .chatting ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    height: 400px;
+    overflow-y: scroll;
+    border: none;
+  }
+  
+  .chatting ul li {
+    padding: 10px 15px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    border-radius: 5px;
+    background-color: rgb(246, 209, 246);
+  }
+  
+  .chatting ul li:last-child {
+    border-bottom: none;
+  }
+  
+  .chat-message {
+    flex-grow: 1;
+    padding: 10px;
+    border-radius: 5px;
+    margin-right: 10px;
+  }
+  
+  .chat-name {
+    font-weight: bold;
+    margin-right: 5px;
+  }
+  
+  .chatting form {
+    display: flex;
+    margin-top: 20px;
+  }
+  
+  .chatting form input[type="text"] {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    flex-grow: 1;
+  }
+  
+  .chatting form button {
+    padding: 10px 10px;
+    width: 80px;
+    height: 40px;
+    border: none;
+    border-radius: 5px;
+    background-color: #343a40;
+    color: #fff;
+    cursor: pointer;
+  }
+  
+  #name {
+    width: 80px;
+    margin-right: 10px;
+  }
+  
+  #message-input {
+    width: 150px;
+}
+  
