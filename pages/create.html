@@ -99,17 +99,6 @@
         
             if (!projectName.trim() || !projectInfo.trim()) {
                 alert('프로젝트 이름과 프로젝트 정보는 필수 입력 사항입니다.');
-                // 입력된 데이터를 localStorage에 저장
-                const formDataToStore = {
-                    projectName,
-                    projectInfo,
-                    deadline,
-                    invitedUserIDs: Array.from(invitedUserInputs).map(input => input.value.trim())
-                };
-                localStorage.setItem('formData', JSON.stringify(formDataToStore));
-
-                // 이전 페이지로 이동
-                window.history.back();
                 return;
             }
         
