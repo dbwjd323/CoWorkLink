@@ -126,44 +126,51 @@
                 },
                 body: JSON.stringify(formData),
             })
-            .then(response => response.json())
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else if (response.status === 400) {
+                    return response.json().then(data => Promise.reject(data));
+                } else {
+                    throw new Error('서버 응답이 실패했습니다.');
+                }
+            })
             .then(data => {
                 if (data.success) {
                     alert(data.message);
                     window.location.href = '/myProject';
                 } else {
-                    // Provide more specific error messages based on server response
-                    if (data.nonExistingUserIDs && data.nonExistingUserIDs.length > 0) {
-                        const confirmation = confirm(`존재하지 않는 사용자 ID가 포함되어 있습니다. 다시 확인하세요: ${data.nonExistingUserIDs.join(', ')}`);
-
-                        if (confirmation) {
-                            // 아이디 입력 필드 비워두기
-                            const invitedUserInputs = document.querySelectorAll('.invitedUserID');
-                            invitedUserInputs.forEach(input => {
-                                input.value = '';
-                            });
-                            // 현재 입력된 데이터를 localStorage에 저장 (확인 버튼을 눌렀을 때만 저장)
-                            const formDataToStore = {
-                                projectName,
-                                projectInfo,
-                                deadline,
-                                invitedUserIDs: Array.from(invitedUserInputs).map(input => input.value.trim())
-                            };
-                            localStorage.setItem('formData', JSON.stringify(formDataToStore));
-
-
-                            // 프로젝트 생성 페이지로 이동
-                            window.location.href = '/create';
-                        }
-                    } else {
-                        console.log('프로젝트 생성에 실패했습니다. 서버에서 전달된 오류 메시지:', data.message);
-                    }
+                    console.error('프로젝트 생성에 실패했습니다. 서버에서 전달된 오류 메시지:', data.message);
                 }
             })
             .catch(error => {
                 console.error('Error submitting form:', error);
-                alert('서버 응답이 실패했습니다.');
+                if (error.nonExistingUserIDs && error.nonExistingUserIDs.length > 0) {
+                    const confirmation = confirm(`존재하지 않는 사용자 ID가 포함되어 있습니다. 다시 확인하세요: ${error.nonExistingUserIDs.join(', ')}`);
+            
+                    if (confirmation) {
+                        // 아이디 입력 필드 비워두기
+                        const invitedUserInputs = document.querySelectorAll('.invitedUserIDs');
+                        invitedUserInputs.forEach(input => {
+                            input.value = '';
+                        });
+                        // 현재 입력된 데이터를 localStorage에 저장 (확인 버튼을 눌렀을 때만 저장)
+                        const formDataToStore = {
+                            projectName,
+                            projectInfo,
+                            deadline,
+                            invitedUserIDs: Array.from(invitedUserInputs).map(input => input.value.trim())
+                        };
+                        localStorage.setItem('formData', JSON.stringify(formDataToStore));
+            
+                        // 프로젝트 생성 페이지로 이동
+                        window.location.href = '/create';
+                    }
+                } else {
+                    alert('서버 응답이 실패했습니다.');
+                }
             });
+            
         }
         document.addEventListener('DOMContentLoaded', () => {
             // localStorage에서 데이터를 불러옴 (확인 버튼을 눌렀을 때만 불러옴)
