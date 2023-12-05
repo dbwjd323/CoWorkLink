@@ -144,7 +144,7 @@ app.post('/create', (req, res) => {
 
     if (!projectName || !projectInfo || invitedUserIDsArray.length === 0) {
         console.log('필수 입력 필드 누락');
-        res.status(400).json({ message: '필수 입력 필드를 입력하세요.' });
+        // res.status(400).json({ message: '필수 입력 필드를 입력하세요.' });
         return;
     }
 
