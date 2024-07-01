@@ -15,8 +15,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "gh-pages -d pages"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "homepage": "https://dbwjd323.github.io/CoWorkLink",
+  "devDependencies": {
+    "gh-pages": "^6.1.1"
+  }
 }
