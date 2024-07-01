@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="/public/index.css">
+    <link rel="stylesheet" href="/public/projectPage.css">
+    <script src="/public/header.js"></script>
+    <script src="/public/projectPage.js"></script>
+</head>
+<body onload="displayProjectInfo()">
+    <header id="header-placeholder"></header>
+    <nav id="navigation-placeholder"></nav>
+    <form action="/projectPage" method="get">
+        <div class="project-page-container">
+            <div class="project-title">
+                <div class="title-div">
+                    <h1 id="projectName"></h1>
+                </div>
+                <div class="btn-div">
+                    <button class="chatBtn" onclick="openChatPage()">채팅하기</button>
+                </div>
+            </div>
+
+            <div class="list-container">
+                <div class="project-info-box">
+                    <div class="project-info">
+                        <h2>프로젝트 정보</h2>
+                        <p id="projectInfoText"></p>
+                    </div>
+                    <div class="deadline-box">
+                        <h2>마감일</h2>
+                        <p id="deadline"></p>
+                    </div>
+                    <div class="teammate-box">
+                        <h2>프로젝트 팀원</h2>
+                        <span id="teammate"></span>
+                    </div>
+                    <!-- 수정 팝업 -->
+                    <a href="#edit_project_pop" class="project-info-edit" onclick="openEditProjectPopup()">수정</a>
+
+                    <div id="edit_project_pop" class="edit-pop-wrap" style="display:none;">
+                        <div class="edit_pop_inner">
+                          <h2>프로젝트 정보 수정</h2>
+                      
+                          <div class="input-container">
+                            <label for="projectName">프로젝트 이름</label>
+                            <input type="text" id="editProjectName" name="projectName">
+                          </div>
+                      
+                          <div class="input-container">
+                            <label for="projectInfo">프로젝트 정보</label>
+                            <textarea id="editProjectInfo" rows="4" name="projectInfo"></textarea>
+                          </div>
+                      
+                          <div class="input-container">
+                            <label for="deadline">마감일</label>
+                            <input type="date" id="editDeadline" name="deadline">
+                          </div>
+                          <!-- 프로젝트 팀원 삭제 추가 기능 -->
+                          <div id="teammateList">
+                            <ul>
+                              <label for="teammateListId">팀원 수정하기</label>
+                            </ul>
+                          </div>
+                          
+                          <button type="button" class="btn_save" onclick="saveProject()">저장</button>
+                          <button type="button" class="btn_close" onclick="closeEditProjectPopup()">닫기</button>
+                        </div>
+                      </div>
+                    </div>
+                    <!-- 작업 관리  -->
+                    <div class="task-list-container">
+                        <div class="list-box-title">
+                            <h2>작업 관리</h2>
+                            <button class="add-task-button" onclick="toggleAddTaskPopup()">+</button>
+                        </div>
+                        <div class="list-box-container">
+                            <div class="list-box" onclick="openEditTaskPopup(1, 90)">
+                                <div class="taskname-condition">
+                                    <h4 class="task-title">작업 이름</h4>
+                                    <span class="condition">작업상태</span>
+                                </div>
+                                <div class="assign-div">
+                                    <span class="assignedTo">담당자</span>
+                                </div>                        
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 작업 수정 팝업 -->
+                    <div id="edit-task-popup" class="edit-task-popup" style="display: none;">
+                        <div class="edit-task-inner">
+                            <h3>작업 수정</h3>
+    
+                            <label for="taskName">작업 이름</label>
+                            <input type="text" id="editTaskName" name="taskName">
+    
+                            <label for="taskStatus">진행 상태</label>
+                            <select id="editTaskStatus" name="taskStatus">
+                              <option value="작업 완료">작업 완료</option>
+                              <option value="작업 중">작업 중</option>
+                              <option value="작업 전">작업 전</option>
+                            </select>
+    
+                            <label for="assignedTo">담당자</label>
+                            <select id="editAssignedTo" name="assignedTo">
+                                <!-- 여기에 서버에서 사용자 목록을 불러와서 옵션으로 추가 -->
+                            </select>
+    
+                            <button type="button" id="editButton" onclick="saveTask()">수정</button>
+                            <button type="button" id="closeButton" onclick="closePopup('#edit-task-popup')">닫기</button>
+                        </div>
+                      </div>
+    
+                    <!-- 작업 관리 팝업 -->
+                    <div class="add-task-popup" id="addTaskPopup" style="display:none;">
+                        <h2>작업 추가</h2>
+                        <div class="input-container">
+                            <label for="taskName">작업 이름</label>
+                            <input type="text" id="taskName" name="taskName" required>
+                        </div>
+                        <div class="input-container">
+                            <label for="assignedTo">담당자</label>
+                            <select id="assignedTo" name="assignedTo" required>
+                                <!-- 여기에 서버에서 사용자 목록을 불러와서 옵션으로 추가 -->
+                            </select>
+                        </div>
+                        <div class="input-container">
+                            <label for="taskStatus">진행 상태</label>
+                            <select id="taskStatus" name="taskStatus" required>
+                                <option value="작업 전">작업 전</option>
+                                <option value="작업 중">작업 중</option>
+                                <option value="작업 완료">작업 완료</option>
+                            </select>
+                        </div>
+                        <button type="button" onclick="addTask()">추가</button>
+                        <button type="button" onclick="closePopup('#addTaskPopup')">취소</button>
+                    </div>
+            </div>
+        </div>
+    </form>
+    <footer id="footer-placeholder"></footer>
+</body>
+</html>

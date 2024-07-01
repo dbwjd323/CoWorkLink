@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>My Project</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <link rel="stylesheet" href="/public/index.css">
+        <link rel="stylesheet" href="/public/myPage.css">
+        <script src="/public/header.js"></script>
+    </head>
+    <body>
+        <header id="header-placeholder"></header>
+        <nav id="navigation-placeholder"></nav>
+
+        <div class="myPage-div">
+            <form id="myPageForm">
+                <h2>Personal Settings</h2>
+                <ul class="myPage-list">
+                    <li>
+                        <label for="username">Username</label>
+                        <input type="text" id="username">
+                        <button type="button" id="username-update-button" onclick="updateUsername()">Update</button>    
+                    </li>
+                    <li>
+                        <label for="password">Password</label>
+                        <input type="password" id="password">
+                        <button type="button" id="password-update-button" onclick="updatePassword()">Update</button>
+                    </li>
+                    <li>
+                        <label for="email">Email</label>
+                        <input type="email" id="email">
+                        <button type="button" id="email-update-button" onclick="updateEmail()">Update</button>
+                    </li>
+                </ul>
+              </form>
+              
+        </div>
+
+        <footer id="footer-placeholder"></footer>
+        <script>
+            // fetch the template content for header
+            fetch('/public/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-placeholder').innerHTML = data;
+                return fetch('/getLoginStatus');
+            });
+            fetch('/public/navigation.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navigation-placeholder').innerHTML = data;
+            });
+            fetch('/public/footer.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('footer-placeholder').innerHTML = data;
+            });
+
+            // Fetch user data and set as placeholders
+            fetch('/myPageData')
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('username').value = data.username;
+                document.getElementById('email').value = data.email;
+            });
+
+            function updateUsername() {
+                const username = document.getElementById('username').value;
+              
+                fetch('/updateUsername', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ username }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    alert('Username updated successfully!');
+                  } else {
+                    alert('Error updating username: ' + data.error);
+                  }
+                });
+              }
+              
+              function updatePassword() {
+                const password = document.getElementById('password').value;
+              
+                fetch('/updatePassword', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ password }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    alert('Password updated successfully!');
+                  } else {
+                    alert('Error updating password: ' + data.error);
+                  }
+                });
+              }
+              
+              function updateEmail() {
+                const email = document.getElementById('email').value;
+              
+                fetch('/updateEmail', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ email }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    alert('Email updated successfully!');
+                  } else {
+                    alert('Error updating email: ' + data.error);
+                  }
+                });
+              }
+              
+        </script>
+    </body>
+</html>
