@@ -1,0 +1,111 @@
+.create-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #094275;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+form {
+    width: 90%;
+    height: 60%;
+}
+
+.create-container h2 {
+    text-align: center;
+    font-size: 30px;
+    color: #FED7D0;
+    margin-bottom: 40px;
+}
+
+.form-container {
+    background-color: #FED7D0;
+    color: black;
+    width: 100%;
+    height: 80%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.name-and-info-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.name-group{
+    margin-left: 150px;
+    margin-top: 30px;
+}
+.project-info-group {
+    display: flex;
+    align-items: center;
+    margin-right: 150px;
+    margin-top: 30px;
+}
+
+.project-info-group label{
+    margin-right: 30px;
+    margin-bottom: 50px;
+}
+/* .manager-group{
+    margin-top: 30px;
+    margin-right: 150px;
+} */
+
+.deadline-container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.deadline-group{
+    margin-top: 0;
+    margin-left: 185px;
+}
+
+
+.team-group{
+    display: flex;
+    justify-content: center;
+}
+
+.invited-users-row input{
+    margin-right: 10px;
+    margin-bottom: 3px;
+}
+
+/* input .invitedUserID{
+    margin-right: 0;
+} */
+
+label {
+    margin-right: 30px;
+}
+
+input,
+textarea {
+    width: 180px;
+    padding: 5px;
+    background-color: #FED7D0;
+    border: 1px solid; 
+}
+
+textarea {
+    height: 60px;
+    resize: none; 
+}
+
+.submit-btn {
+    width: 20%;
+    padding: 10px;
+    background-color: #DC7364;
+    color: white;
+    border: none;
+    cursor: pointer;
+    align-self: center;
+    margin-bottom: 20px;
+}

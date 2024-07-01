@@ -1,0 +1,19 @@
+.header-links{
+    display: flex;
+    margin-left: auto;
+}
+
+.header-links a {
+    color: white;
+    text-decoration: none;
+    margin-right: 40px;
+    font-size: 14px;
+}
+
+#join-link {
+    margin-right: 80px;
+}
+
+.logoutLink{
+    margin-right: 80px;
+}

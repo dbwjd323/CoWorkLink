@@ -1,0 +1,27 @@
+.logo-container {
+    color: #FED7D0;
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 0px;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+.logo-container i {
+    color: #DC7364;
+    font-size: 28px;
+    margin-right: 4px;
+}
+
+nav ul {
+    list-style-type: none;
+    display: flex;
+    margin-right: 40px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    margin-left: 40px;
+    margin-right: 40px;
+}
